@@ -3,15 +3,28 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:PortScanner"
-        mc:Ignorable="d" Icon="/Assets/Icons/windmill.ico"
-        Title="Port Scanner" Height="500" Width="1000">
+        xmlns:local="clr-namespace:PortScanner" 
+        mc:Ignorable="d"
+        Title="Port Scanner" Icon="/Assets/Icons/windmill.ico"
+        WindowStartupLocation="CenterScreen"
+        Height="500" Width="1000" MinHeight="500" MinWidth="1000">
     <Grid>
-        <DockPanel>
+        <DockPanel LastChildFill="False">
             <Menu DockPanel.Dock="Top">
-                <MenuItem Header="Options"></MenuItem>
-                <MenuItem Header="View"></MenuItem>
-                <MenuItem Header="Other"></MenuItem>
+                <MenuItem Header="Opzioni">
+                    <MenuItem Header="Esci" Click="Esci"/>
+                </MenuItem>
+                <MenuItem Header="Visualizza">
+                    <MenuItem Header="Cambia Tema">
+                        <MenuItem Header="Tema Chiaro" Click="Tema_Chiaro"/>
+                        <MenuItem Header="Tema Scuro" Click="Tema_Scuro"/>
+                        <MenuItem Header="Tema di Sistema" Click="Tema_Sistema"/>
+                    </MenuItem>
+                </MenuItem>
+                <MenuItem Header="Altro">
+                    <MenuItem Header="Lo sviluppatore" Click="Crediti_Sviluppatore"/>
+                    <MenuItem Header="L'azienda" Click="Crediti_Azienda"/>
+                </MenuItem>
             </Menu>
         </DockPanel>
     </Grid>
