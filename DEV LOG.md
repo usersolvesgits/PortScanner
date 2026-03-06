@@ -24,3 +24,4 @@ Questo documento riporta il progresso dello sviluppo del progetto.
 **Funzionalità implementate**
 - Opzioni per uscire dall'applicazione
 - Opzioni per cambiare il tema dell'applicazione (Chiaro, Scuro e Tema di Sistema)
+- Aggiunti crediti sviluppatore ed azienda
