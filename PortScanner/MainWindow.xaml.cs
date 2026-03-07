@@ -7,6 +7,8 @@
  */
 
 
+using PortScanner.Core.Models;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 using Util = PortScanner.Core.Utils.Util;
@@ -16,8 +18,11 @@ namespace PortScanner {
     public partial class MainWindow : Window {
         const string urlSviluppatore = "https://github.com/usersolvesgits";
         const string urlAzienda = "https://www.sirius.to.it/";
+        ObservableCollection<TCP_Socket> listaSockets;
         public MainWindow() {
             InitializeComponent();
+            listaSockets = new();
+            dtgScansioni.ItemsSource = listaSockets;
         }
 
         private void Esci(object sender, RoutedEventArgs e) {
@@ -62,6 +67,16 @@ namespace PortScanner {
 #pragma warning disable WPF0001
             Application.Current.ThemeMode = ThemeMode.System;
 #pragma warning restore WPF0001
+        }
+
+        private void Scan_AvviaScansione(object sender, RoutedEventArgs e) {
+            //TODO -> logica inizio scansione
+        }
+        private void Scan_EsportaJSON(object sender, RoutedEventArgs e) {
+            //TODO -> logica esporto JSON
+        }
+        private void Scan_EsportaCSV(object sender, RoutedEventArgs e) {
+            //TODO -> logica esporto CSV
         }
     }
 }

@@ -2,14 +2,15 @@
 
 ## Introduzione
 Questo documento riporta il progresso dello sviluppo del progetto.
+La struttura del progetto è stata pensata per la maggiore scalabilità possibile, per questo potrebbe sembrare esagerata.
 
 ---
 
 ## Informazioni sul progetto
 **Progetto**: Port Scanner  
 **Sviluppatore**: Francesco Bianchini  
-**Tecnologie utilizzate**: .Net Framework / WPF  
-**Data di inizio (dd/MM/yyyy)**: 06/03/2026   
+**Tecnologie utilizzate**: .NET Framework / WPF  
+**Data di inizio (dd/MM/yyyy)**: 06/03/2026  
 
 ---
 

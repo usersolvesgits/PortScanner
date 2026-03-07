@@ -1,12 +1,13 @@
 ﻿using System.Diagnostics;
-using System.Net.Sockets;
-using System.Windows;
 using System.Net;
+using System.Net.Sockets;
+using System.Text.Json;
+using System.Windows;
 
 namespace PortScanner.Core.Models {
-    public class Socket {
+    public class TCP_Socket {
         private int _numPorta;
-        private static readonly Dictionary<int, string> _portaServizi = new() {
+        private static readonly IReadOnlyDictionary<int, string> _serviziConosciuti = new Dictionary<int, string>() {
             { 20, "FTP Data" }, { 21, "FTP" }, { 22, "SSH" }, { 23, "Telnet" }, { 25, "SMTP" },
             { 53, "DNS" },
             { 67, "DHCP" }, { 68, "DHCP" }, { 69, "TFTP" },
@@ -18,7 +19,8 @@ namespace PortScanner.Core.Models {
             { 161, "SNMP" },
             { 179, "BGP" },
             { 389, "LDAP" },
-            { 443, "HTTPS" }, { 445, "SMB" },
+            { 443, "HTTPS" },
+            { 445, "SMB" },
             { 465, "SMTPS" },
             { 500, "ISAKMP" },
             { 587, "SMTP Submission" },
@@ -68,7 +70,7 @@ namespace PortScanner.Core.Models {
                 if (value < IPEndPoint.MinPort || value > IPEndPoint.MaxPort) {
                     throw new ArgumentOutOfRangeException(nameof(value), $"Il valore inserito deve essere un numero compreso tra {IPEndPoint.MinPort} e {IPEndPoint.MaxPort}!");
                 } else {
-                    if (_portaServizi.TryGetValue(value, out string Servizio)) {
+                    if (_serviziConosciuti.TryGetValue(value, out string Servizio)) {
                         this.Servizio = Servizio;
                     } else {
                         this.Servizio = "Sconosciuto";
@@ -88,11 +90,10 @@ namespace PortScanner.Core.Models {
         /// </summary>
         public string Servizio { get; set; }
 
-        public Socket(string IPAddress, int NumeroPorta, bool IsOpen, string Servizio) {
+        public TCP_Socket(string IPAddress, int NumeroPorta, bool IsOpen) {
             this.IPAddress = IPAddress;
             this.NumeroPorta = NumeroPorta;
             this.IsOpen = IsOpen;
-            this.Servizio = Servizio;
         }
 
         public override string ToString() {
@@ -113,8 +114,8 @@ namespace PortScanner.Core.Models {
         /// Una stringa che rappresenta lo stato della porta nel formato:
         /// <c>IsOpen,NumeroPorta,Servizio</c>.
         /// </returns>
-        public string ToCsv(char separatore = ',') {
-            return $"{IsOpen}{separatore}{NumeroPorta}{separatore}{Servizio}";
+        public static string ToCSV(TCP_Socket socket, char separatore = ',') {
+            return $"{socket.IsOpen}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
         }
 
         /// <summary>
@@ -136,11 +137,23 @@ namespace PortScanner.Core.Models {
         /// <c>IPAddres,IsOpen,NumeroPorta,Servizio</c>
         /// se <paramref name="ShowIPAddress"/> è <see langword="true"/>.
         /// </returns>
-        public string ToCsv(bool ShowIPAddress, char separatore = ',') {
+        public static string ToCSV(TCP_Socket socket, char separatore = ',', bool ShowIPAddress = false) {
             if (ShowIPAddress) {
-                return $"{IPAddress}{separatore}{IsOpen}{separatore}{NumeroPorta}{separatore}{Servizio}";
+                return $"{socket.IPAddress}{separatore}{socket.IsOpen}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
             }
-            return $"{IsOpen}{separatore}{NumeroPorta}{separatore}{Servizio}";
+            return $"{socket.IsOpen}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
+        }
+
+        /// <summary>
+        /// Formatta le informazioni di un oggetto TCP_Socket in una stringa JSON.
+        /// </summary>
+        /// <param name="socket">Un oggetto TCP_Socket da convertire in formato JSON.</param>
+        /// <returns>Una stringa contenente la rappresentazione JSON del TCP_Socket specificato.</returns>
+        public static string ToJSON(TCP_Socket socket) {
+            JsonSerializerOptions opzioni = new() {
+                WriteIndented = true
+            };
+            return JsonSerializer.Serialize(socket, opzioni);
         }
 
         /// <summary>
@@ -166,6 +179,12 @@ namespace PortScanner.Core.Models {
                 } catch (SocketException ex) {
                     Debug.WriteLine($"Porta numero {NumeroPorta} non raggiungibile!");
                     // TODO -> aggiungere logica quando porta non è raggiungibile!
+                } catch (Exception ex) {
+                    Debug.WriteLine(ex);
+                    MessageBox.Show("ERRORE: Errore rilevato durante l'esecuzione del programma!",
+                                    "Errore",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Error);
                 }
             }
         }

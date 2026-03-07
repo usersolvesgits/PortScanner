@@ -3,29 +3,98 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:PortScanner" 
+        xmlns:local="clr-namespace:PortScanner"
         mc:Ignorable="d"
         Title="Port Scanner" Icon="/Assets/Icons/windmill.ico"
         WindowStartupLocation="CenterScreen"
-        Height="500" Width="1000" MinHeight="500" MinWidth="1000">
-    <Grid>
-        <DockPanel LastChildFill="False">
-            <Menu DockPanel.Dock="Top">
-                <MenuItem Header="Opzioni">
-                    <MenuItem Header="Esci" Click="Esci"/>
-                </MenuItem>
-                <MenuItem Header="Visualizza">
-                    <MenuItem Header="Cambia Tema">
-                        <MenuItem Header="Tema Chiaro" Click="Tema_Chiaro"/>
-                        <MenuItem Header="Tema Scuro" Click="Tema_Scuro"/>
-                        <MenuItem Header="Tema di Sistema" Click="Tema_Sistema"/>
-                    </MenuItem>
-                </MenuItem>
-                <MenuItem Header="Altro">
-                    <MenuItem Header="Lo sviluppatore" Click="Crediti_Sviluppatore"/>
-                    <MenuItem Header="L'azienda" Click="Crediti_Azienda"/>
-                </MenuItem>
-            </Menu>
-        </DockPanel>
-    </Grid>
+        Height="760" Width="1000" MinHeight="760" MinWidth="1000">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+
+		<Menu Grid.Row="0">
+			<MenuItem Header="Opzioni">
+				<MenuItem Header="Esci" Click="Esci"/>
+			</MenuItem>
+			<MenuItem Header="Visualizza">
+				<MenuItem Header="Cambia Tema">
+					<MenuItem Header="Tema Chiaro" Click="Tema_Chiaro"/>
+					<MenuItem Header="Tema Scuro" Click="Tema_Scuro"/>
+					<MenuItem Header="Tema di Sistema" Click="Tema_Sistema"/>
+				</MenuItem>
+			</MenuItem>
+			<MenuItem Header="Altro">
+				<MenuItem Header="Lo sviluppatore" Click="Crediti_Sviluppatore"/>
+				<MenuItem Header="L'azienda" Click="Crediti_Azienda"/>
+			</MenuItem>
+		</Menu>
+
+		<Grid Grid.Row="1" Margin="10">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="300"/>
+					<ColumnDefinition Width="*"/>
+				</Grid.ColumnDefinitions>
+
+				<StackPanel Grid.Column="0" Margin="10" VerticalAlignment="Top">
+					<TextBlock Text="Parametri Scansione" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+
+					<TextBlock Text="IP/Hostname:"/>
+					<TextBox Name="txtIPAddress" Margin="0,5,0,10" />
+
+					<TextBlock Text="Range Porte:"/>
+					<StackPanel Orientation="Horizontal" Margin="0,5,0,10">
+						<TextBox Name="txtPortStart" Width="50" Margin="0,0,5,0"/>
+						<TextBlock Text="-" VerticalAlignment="Center"/>
+						<TextBox Name="txtPortEnd" Width="50" Margin="5,0,0,0"/>
+					</StackPanel>
+
+					<TextBlock Text="Timeout (ms):"/>
+					<TextBox Name="txtTimeout" Margin="0,5,0,10" Text="1000"/>
+
+					<Button Content="Avvia Scansione" Click="Scan_AvviaScansione" Height="30" Margin="0,10,0,0"/>
+
+					<Separator Margin="0,10,0,10"/>
+
+					<TextBlock Text="Filtri / Ordinamento" FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
+					<CheckBox Name="chkAperte" Content="Mostra solo porte aperte" Margin="0,0,0,5"/>
+					<CheckBox Name="chkChiuse" Content="Mostra solo porte chiuse" Margin="0,0,0,10"/>
+					<ComboBox Name="cmbOrdina" Margin="0,0,0,5">
+						<ComboBoxItem Content="Numero Porta"/>
+						<ComboBoxItem Content="Stato Porta"/>
+					</ComboBox>
+
+					<Separator Margin="0,10,0,10"/>
+
+					<TextBlock Text="Esporta Risultati" FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
+					<Button Content="Esporta JSON" Click="Scan_EsportaJSON" Height="30" Margin="0,5,0,0"/>
+					<Button Content="Esporta CSV" Click="Scan_EsportaCSV" Height="30" Margin="0,5,0,0"/>
+				</StackPanel>
+
+				<Grid Grid.Column="1" Margin="10,0,0,0">
+					<Grid.RowDefinitions>
+						<RowDefinition Height="*"/>
+						<RowDefinition Height="150"/>
+					</Grid.RowDefinitions>
+
+					<DataGrid Name="dtgScansioni" AutoGenerateColumns="False" IsReadOnly="True" Margin="0,0,0,10">
+						<DataGrid.Columns>
+							<DataGridTextColumn Header=" Stato" Binding="{Binding IsOpen}" Width="*"/>
+							<DataGridTextColumn Header=" Numero della Porta" Binding="{Binding NumeroPorta}" Width="*"/>
+							<DataGridTextColumn Header=" Servizio Rilevato" Binding="{Binding Servizio}" Width="*"/>
+						</DataGrid.Columns>
+					</DataGrid>
+
+					<StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,10,0,0">
+						<TextBlock Text="Statistiche Scansione" FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
+						<TextBlock Name="lblDurata" Text="Durata: 0 ms"/>
+						<TextBlock Name="lblPorteTrovate" Text="Porte Aperte: 0"/>
+						<TextBlock Name="lblTotalePorte" Text="Totale Porte Scansionate: 0"/>
+					</StackPanel>
+				</Grid>
+			</Grid>
+		</Grid>
+	</Grid>
 </Window>
