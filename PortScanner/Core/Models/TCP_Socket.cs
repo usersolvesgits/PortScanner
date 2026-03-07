@@ -88,7 +88,7 @@ namespace PortScanner.Core.Models {
         /// <summary>
         /// Indica che tipo di servizio viene usato in quale porta.
         /// </summary>
-        public string Servizio { get; set; }
+        public string Servizio { get; private set; }
 
         public TCP_Socket(string IPAddress, int NumeroPorta, bool IsOpen) {
             this.IPAddress = IPAddress;

@@ -19,10 +19,23 @@ La struttura del progetto è stata pensata per la maggiore scalabilità possibil
 ### [06/03/2026]
 
 **Attività svolte**
-- Creazione UI basica
+- Creazione menù dell'interfaccia grafica
 - Primi controlli
 
 **Funzionalità implementate**
 - Opzioni per uscire dall'applicazione
 - Opzioni per cambiare il tema dell'applicazione (Chiaro, Scuro e Tema di Sistema)
 - Aggiunti crediti sviluppatore ed azienda
+
+### [07/03/2026]
+
+**Attività svolte**
+- Creazione UI
+- Modifiche della classe TCP_Socket
+
+**Funzionalità implementate**
+- Creata l'interfaccia grafica principale dell'applicazione
+- Creati metodi statici della classe TCP_Socket per la formattazione delle informazioni relative alle sockets in formati CSV e JSON
+
+**Bug Fix**
+- Risolto bug che permetteva l'inserimento dall'esterno della proprietà "Servizio" nella classe TCP_Socket

@@ -2,6 +2,9 @@
  *  TODOS:
  *      -MainWindow.xaml.cs:
  *          -OnClosing()
+ *          -Scan_AvviaScansione()
+ *          -Scan_EsportaCSV()
+ *          -Scan_EsportaJSON()
  *      -Socket:
  *          - Connect()
  */
@@ -18,7 +21,12 @@ namespace PortScanner {
     public partial class MainWindow : Window {
         const string urlSviluppatore = "https://github.com/usersolvesgits";
         const string urlAzienda = "https://www.sirius.to.it/";
+
         ObservableCollection<TCP_Socket> listaSockets;
+        string hostname = String.Empty;
+        int rangePortMin,
+            rangePortMax;
+
         public MainWindow() {
             InitializeComponent();
             listaSockets = new();
@@ -70,7 +78,7 @@ namespace PortScanner {
         }
 
         private void Scan_AvviaScansione(object sender, RoutedEventArgs e) {
-            //TODO -> logica inizio scansione
+            //TODO -> logica principale scansione
         }
         private void Scan_EsportaJSON(object sender, RoutedEventArgs e) {
             //TODO -> logica esporto JSON

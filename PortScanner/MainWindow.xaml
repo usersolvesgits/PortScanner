@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Port Scanner" Icon="/Assets/Icons/windmill.ico"
         WindowStartupLocation="CenterScreen"
-        Height="760" Width="1000" MinHeight="760" MinWidth="1000">
+        Height="725" Width="1000" MinHeight="725" MinWidth="800">
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
@@ -44,11 +44,11 @@
 					<TextBlock Text="IP/Hostname:"/>
 					<TextBox Name="txtIPAddress" Margin="0,5,0,10" />
 
-					<TextBlock Text="Range Porte:"/>
+					<TextBlock Text="Range Porte (incluse):"/>
 					<StackPanel Orientation="Horizontal" Margin="0,5,0,10">
-						<TextBox Name="txtPortStart" Width="50" Margin="0,0,5,0"/>
+						<TextBox Name="txtPortMin" Width="50" Margin="0,0,5,0"/>
 						<TextBlock Text="-" VerticalAlignment="Center"/>
-						<TextBox Name="txtPortEnd" Width="50" Margin="5,0,0,0"/>
+						<TextBox Name="txtPortMax" Width="50" Margin="5,0,0,0"/>
 					</StackPanel>
 
 					<TextBlock Text="Timeout (ms):"/>
