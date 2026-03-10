@@ -58,9 +58,15 @@ namespace PortScanner.Core.Models {
         };
 
         /// <summary>
+        /// Indica l'hostname del destinatario.
+        /// </summary>
+        public string Hostname { get; private set; }
+
+        /// <summary>
         /// Indica l'indirizzo IP del destinatario.
         /// </summary>
-        public string IPAddress { get; set; }
+        public IPAddress IPAddress { get; private set; }
+
         /// <summary>
         /// Indica il numero della porta.
         /// </summary>
@@ -79,27 +85,35 @@ namespace PortScanner.Core.Models {
                 }
             }
         }
+
         /// <summary>
         /// Indica lo stato di connessione della porta.
         /// Se impostato su <see langword="true"/> la porta è aperta.
         /// Se impostato su <see langword="false"/> la porta non è aperta.
         /// </summary>
-        public bool IsOpen { get; set; }
+        public string StatoPorta { get; private set; }
+
         /// <summary>
         /// Indica che tipo di servizio viene usato in quale porta.
         /// </summary>
         public string Servizio { get; private set; }
 
-        public TCP_Socket(string IPAddress, int NumeroPorta, bool IsOpen) {
+        public TCP_Socket(string Hostname, int NumeroPorta) {
+            this.Hostname = Hostname;
+            IPAddress[] addresses = Dns.GetHostAddresses(Hostname);
+            this.IPAddress = addresses.FirstOrDefault();
+            this.NumeroPorta = NumeroPorta;
+        }
+
+        public TCP_Socket(IPAddress IPAddress, int NumeroPorta) {
             this.IPAddress = IPAddress;
             this.NumeroPorta = NumeroPorta;
-            this.IsOpen = IsOpen;
         }
 
         public override string ToString() {
-            return $"Indirizzo IP destinatario: {IPAddress};\t" +
+            return $"Indirizzo IP destinatario: {IPAddress?.ToString() ?? Hostname};\t" +
                    $"Numero della porta: {NumeroPorta};\t" +
-                   $"Porta aperta (aperta se true): {IsOpen};\t" +
+                   $"Stato della porta: {StatoPorta};\t" +
                    $"Servizio: {Servizio}.";
         }
 
@@ -115,7 +129,7 @@ namespace PortScanner.Core.Models {
         /// <c>IsOpen,NumeroPorta,Servizio</c>.
         /// </returns>
         public static string ToCSV(TCP_Socket socket, char separatore = ',') {
-            return $"{socket.IsOpen}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
+            return $"{socket.StatoPorta}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
         }
 
         /// <summary>
@@ -139,9 +153,9 @@ namespace PortScanner.Core.Models {
         /// </returns>
         public static string ToCSV(TCP_Socket socket, char separatore = ',', bool ShowIPAddress = false) {
             if (ShowIPAddress) {
-                return $"{socket.IPAddress}{separatore}{socket.IsOpen}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
+                return $"{socket.IPAddress?.ToString()}{separatore}{socket.StatoPorta}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
             }
-            return $"{socket.IsOpen}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
+            return $"{socket.StatoPorta}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
         }
 
         /// <summary>
@@ -163,7 +177,7 @@ namespace PortScanner.Core.Models {
             using (TcpClient TcpC = new()) {
                 try {
                     TcpC.Connect(IPAddress, NumeroPorta);
-                    // TODO -> aggiungere logica quando porta riesce a connettersi!
+                    StatoPorta = "Aperta";
                 } catch (ArgumentNullException ex) {
                     Debug.WriteLine(ex);
                     MessageBox.Show("ERRORE: Uno dei campi inseriti è nullo!",
@@ -177,8 +191,8 @@ namespace PortScanner.Core.Models {
                                     MessageBoxButton.OK,
                                     MessageBoxImage.Error);
                 } catch (SocketException ex) {
-                    Debug.WriteLine($"Porta numero {NumeroPorta} non raggiungibile!");
-                    // TODO -> aggiungere logica quando porta non è raggiungibile!
+                    Debug.WriteLine($"Porta numero {NumeroPorta} non raggiungibile!\n{ex}");
+                    StatoPorta = "Chiusa";
                 } catch (Exception ex) {
                     Debug.WriteLine(ex);
                     MessageBox.Show("ERRORE: Errore rilevato durante l'esecuzione del programma!",

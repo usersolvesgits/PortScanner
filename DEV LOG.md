@@ -39,3 +39,20 @@ La struttura del progetto è stata pensata per la maggiore scalabilità possibil
 
 **Bug Fix**
 - Risolto bug che permetteva l'inserimento dall'esterno della proprietà "Servizio" nella classe TCP_Socket
+
+### [10/03/2026]
+
+**Attività svolte**
+- Aggiornamenti UI
+- Modifiche della classe TCP_Socket
+- Aggiornamenti backend
+
+**Funzionalità implementate**
+UI:  
+- Aggiunta sezione FAQ
+- Aggiunta opzione per usare lo stile vecchio dell'applicazione
+- Mosse le opzioni di cambio del tema in un menù dedicato  
+
+Backend:  
+- Aggiunto loop di scansione di base
+- Modificato il metodo OnClosing() per attivare il messaggio di avvertimento solo quando una scansione non ha finito.

@@ -19,13 +19,18 @@
 				<MenuItem Header="Esci" Click="Esci"/>
 			</MenuItem>
 			<MenuItem Header="Visualizza">
-				<MenuItem Header="Cambia Tema">
+				<MenuItem Header="Temi">
 					<MenuItem Header="Tema Chiaro" Click="Tema_Chiaro"/>
 					<MenuItem Header="Tema Scuro" Click="Tema_Scuro"/>
-					<MenuItem Header="Tema di Sistema" Click="Tema_Sistema"/>
-				</MenuItem>
-			</MenuItem>
+                    <MenuItem Header="Tema di Sistema" Click="Tema_Sistema"/>
+                </MenuItem>
+                <MenuItem Header="Vecchio stile" Click="Tema_Vecchio"/>
+            </MenuItem>
 			<MenuItem Header="Altro">
+                <MenuItem Header="FAQ">
+                    <MenuItem Header="Cos'è un port scanner?" Click="FAQ_PortScanner"/>
+                    <MenuItem Header="Che cos'è Sirius?" Click="FAQ_Sirius"/>
+                </MenuItem>
 				<MenuItem Header="Lo sviluppatore" Click="Crediti_Sviluppatore"/>
 				<MenuItem Header="L'azienda" Click="Crediti_Azienda"/>
 			</MenuItem>
@@ -42,13 +47,13 @@
 					<TextBlock Text="Parametri Scansione" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
 
 					<TextBlock Text="IP/Hostname:"/>
-					<TextBox Name="txtIPAddress" Margin="0,5,0,10" />
+					<TextBox Name="txtIPAddress" Margin="0,5,0,10" Text="127.0.0.1"/>
 
 					<TextBlock Text="Range Porte (incluse):"/>
 					<StackPanel Orientation="Horizontal" Margin="0,5,0,10">
-						<TextBox Name="txtPortMin" Width="50" Margin="0,0,5,0"/>
+						<TextBox Name="txtPortMin" Width="90" Margin="0,0,5,0"/>
 						<TextBlock Text="-" VerticalAlignment="Center"/>
-						<TextBox Name="txtPortMax" Width="50" Margin="5,0,0,0"/>
+						<TextBox Name="txtPortMax" Width="90" Margin="5,0,0,0"/>
 					</StackPanel>
 
 					<TextBlock Text="Timeout (ms):"/>
@@ -81,10 +86,10 @@
 
 					<DataGrid Name="dtgScansioni" AutoGenerateColumns="False" IsReadOnly="True" Margin="0,0,0,10">
 						<DataGrid.Columns>
-							<DataGridTextColumn Header=" Stato" Binding="{Binding IsOpen}" Width="*"/>
+							<DataGridTextColumn Header=" Stato" Binding="{Binding StatoPorta}" Width="*"/>
 							<DataGridTextColumn Header=" Numero della Porta" Binding="{Binding NumeroPorta}" Width="*"/>
-							<DataGridTextColumn Header=" Servizio Rilevato" Binding="{Binding Servizio}" Width="*"/>
-						</DataGrid.Columns>
+                            <DataGridTextColumn Header=" Servizio Rilevato" Binding="{Binding Servizio}" Width="*"/>
+                        </DataGrid.Columns>
 					</DataGrid>
 
 					<StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,10,0,0">
