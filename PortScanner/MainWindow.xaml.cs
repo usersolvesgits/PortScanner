@@ -1,22 +1,18 @@
 ﻿/*
  *  TODOS:
  *      -MainWindow.xaml.cs:
- *          -OnClosing()
- *          -Scan_AvviaScansione()
- *          -Scan_EsportaCSV()
  *          -Scan_EsportaJSON()
- *      -Socket:
- *          - Connect()
  */
 
 
-using PortScanner.Core.Models;
+using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
-using System.Text.RegularExpressions;
 using System.Windows;
+using PortScanner.Core.Models;
 using Util = PortScanner.Core.Utils.Util;
 
 
@@ -160,16 +156,104 @@ namespace PortScanner {
             scansioneAttiva = true;
             for (int currentPortNum = rangePortMin; currentPortNum <= rangePortMax; currentPortNum++) {
                 TCP_Socket socket = new(target, currentPortNum);
+                try {
+                    socket.Connect();
+                } catch (ArgumentNullException ex) {
+                    Debug.WriteLine(ex);
+                    MessageBox.Show("ERRORE: Uno dei campi inseriti è nullo!",
+                                    "Errore",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Error);
+                } catch (ArgumentOutOfRangeException ex) {
+                    Debug.WriteLine(ex);
+                    MessageBox.Show("ERRORE: Uno dei campi inseriti è al di fuori dei limiti consentiti!",
+                                    "Errore",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Error);
+                } catch (Exception ex) {
+                    Debug.WriteLine(ex);
+                    MessageBox.Show("ERRORE: Errore rilevato durante l'esecuzione del programma!",
+                                    "Errore",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Error);
+                }
                 socket.Connect();
                 listaSockets.Add(socket);
             }
             scansioneAttiva = false;
         }
+
+        private void Scan_EsportaCSV(object sender, RoutedEventArgs e) {
+            if (listaSockets.Count == 0) {
+                MessageBox.Show("Attenzione: Nessun elemento da esportare trovato!",
+                                "Attenzione",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtSeparatoreCSV.Text)) {
+                MessageBox.Show("Attenzione: Inserire un separatore per la formattazione in csv!",
+                                "Attenzione",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                return;
+            }
+
+            if (txtSeparatoreCSV.Text.Length > 1) {
+                MessageBox.Show("Attenzione: Il separatore per la formattazione CSV deve essere un singolo carattere!",
+                                "Attenzione",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                return;
+            }
+
+            char separatoreCSV;
+            try {
+                separatoreCSV = char.Parse(txtSeparatoreCSV.Text);
+            } catch (Exception ex) {
+                Debug.WriteLine(ex);
+                MessageBox.Show("Errore: Errore durante la conversione del carattere separatore per la formattazione CSV!",
+                                "Errore",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Error);
+                return;
+            }
+
+            SaveFileDialog dlg = new() { 
+                Title = "Esporta",
+                Filter = "CSV file (*.csv)|*.csv| All Files (*.*)|*.*",
+                DefaultExt = ".csv",
+                AddExtension = true
+            };
+
+            string filePath = String.Empty;
+            if (dlg.ShowDialog() == true) {
+                filePath = dlg.FileName;
+            }
+
+            try {
+                using (StreamWriter writer = new StreamWriter(filePath)) {
+                    for (int i = 0; i < listaSockets.Count; i++) {
+                        if (i == 0) {
+                            writer.WriteLine($"Target: {listaSockets[i].IPAddress?.ToString()}");
+                            writer.WriteLine($"Stato della porta{separatoreCSV}Numero della porta{separatoreCSV}Servizio rilevato");
+                        }
+                        TCP_Socket socket = listaSockets[i];
+                        writer.WriteLine(TCP_Socket.ToCSV(socket, separatoreCSV));
+                    }
+                }
+            } catch (Exception ex) {
+                Debug.WriteLine(ex);
+                MessageBox.Show("Errore: Errore rilevato durante l'esportazione del file.",
+                                "Errore",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Error);
+            }
+        }
+
         private void Scan_EsportaJSON(object sender, RoutedEventArgs e) {
             //TODO -> logica esporto JSON
-        }
-        private void Scan_EsportaCSV(object sender, RoutedEventArgs e) {
-            //TODO -> logica esporto CSV
         }
 
         private void FAQ_PortScanner(object sender, RoutedEventArgs e) {
@@ -180,7 +264,24 @@ namespace PortScanner {
         }
 
         private void FAQ_Sirius(object sender, RoutedEventArgs e) {
-            //TODO -> aggiungere sub-finestra per informazioni su sirius
+            MessageBox.Show("Sirius è stata fondata nel 2000 come risultato della collaborazione tra l'incubatore di imprese del Politecnico di Torino e un team di esperti con l'obiettivo di sviluppare sistemi software avanzati per la gestione delle centrali elettriche e la trasmissione di energia.\r\n\r\nI membri fondatori di Sirius avevano già accumulato una notevole esperienza nel settore dell'automazione energetica sin dall'inizio degli anni '90, lavorando a stretto contatto con aziende rinomate del settore. \r\nQuesta competenza collettiva ha costituito la base per la crescita e il successo dell'azienda.\r\n\r\nNel corso degli anni, Sirius ha fornito con successo soluzioni a importanti operatori del mercato elettrotecnico. Dal 2006 abbiamo integrato le nostre soluzioni nei prodotti VireoX, sofisticati sistemi di gestione progettati specificamente per l'analisi e il controllo remoto degli impianti di energia rinnovabile.",
+                            "INFO",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+        }
+
+        private void FAQ_Funzionamento(object sender, RoutedEventArgs e) {
+            MessageBox.Show("Uno scanner di porte controlla lo stato delle porte di un dispositivo in rete inviando richieste a diverse porte di un indirizzo IP. In base alla risposta ricevuta può determinare se una porta è aperta (servizio attivo), chiusa (nessun servizio) o filtrata (bloccata da firewall o sistemi di sicurezza).",
+                            "INFO",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+        }
+
+        private void FAQ_Legale(object sender, RoutedEventArgs e) {
+            MessageBox.Show("L'uso di un port scanner è generalmente legale per analizzare la propria rete, effettuare test autorizzati o per scopi di studio. Tuttavia, scansionare sistemi senza autorizzazione può essere considerato attività sospetta o illegale in alcuni paesi. Utilizza sempre questi strumenti in modo responsabile.",
+                            "INFO",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
         }
     }
 }

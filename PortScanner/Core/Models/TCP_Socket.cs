@@ -101,7 +101,7 @@ namespace PortScanner.Core.Models {
         public TCP_Socket(string Hostname, int NumeroPorta) {
             this.Hostname = Hostname;
             IPAddress[] addresses = Dns.GetHostAddresses(Hostname);
-            this.IPAddress = addresses.FirstOrDefault();
+            this.IPAddress = addresses.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork);
             this.NumeroPorta = NumeroPorta;
         }
 
@@ -128,7 +128,7 @@ namespace PortScanner.Core.Models {
         /// Una stringa che rappresenta lo stato della porta nel formato:
         /// <c>IsOpen,NumeroPorta,Servizio</c>.
         /// </returns>
-        public static string ToCSV(TCP_Socket socket, char separatore = ',') {
+        public static string ToCSV(TCP_Socket socket, char separatore) {
             return $"{socket.StatoPorta}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
         }
 
@@ -151,7 +151,7 @@ namespace PortScanner.Core.Models {
         /// <c>IPAddres,IsOpen,NumeroPorta,Servizio</c>
         /// se <paramref name="ShowIPAddress"/> è <see langword="true"/>.
         /// </returns>
-        public static string ToCSV(TCP_Socket socket, char separatore = ',', bool ShowIPAddress = false) {
+        public static string ToCSV(TCP_Socket socket, char separatore, bool ShowIPAddress) {
             if (ShowIPAddress) {
                 return $"{socket.IPAddress?.ToString()}{separatore}{socket.StatoPorta}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
             }
@@ -178,27 +178,9 @@ namespace PortScanner.Core.Models {
                 try {
                     TcpC.Connect(IPAddress, NumeroPorta);
                     StatoPorta = "Aperta";
-                } catch (ArgumentNullException ex) {
-                    Debug.WriteLine(ex);
-                    MessageBox.Show("ERRORE: Uno dei campi inseriti è nullo!",
-                                    "Errore",
-                                    MessageBoxButton.OK,
-                                    MessageBoxImage.Error);
-                } catch (ArgumentOutOfRangeException ex) {
-                    Debug.WriteLine(ex);
-                    MessageBox.Show("ERRORE: Uno dei campi inseriti è al di fuori dei limiti consentiti!",
-                                    "Errore",
-                                    MessageBoxButton.OK,
-                                    MessageBoxImage.Error);
-                } catch (SocketException ex) {
+                }  catch (SocketException ex) {
                     Debug.WriteLine($"Porta numero {NumeroPorta} non raggiungibile!\n{ex}");
                     StatoPorta = "Chiusa";
-                } catch (Exception ex) {
-                    Debug.WriteLine(ex);
-                    MessageBox.Show("ERRORE: Errore rilevato durante l'esecuzione del programma!",
-                                    "Errore",
-                                    MessageBoxButton.OK,
-                                    MessageBoxImage.Error);
                 }
             }
         }

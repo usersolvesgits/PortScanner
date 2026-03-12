@@ -56,3 +56,19 @@ UI:
 Backend:  
 - Aggiunto loop di scansione di base
 - Modificato il metodo OnClosing() per attivare il messaggio di avvertimento solo quando una scansione non ha finito.
+
+### [12/03/2026]
+
+**Attività svolte**
+- Aggiornamenti UI
+- Aggiornamenti backend
+- Modifiche della classe TCP_Socket
+
+**Funzinalità implementate**
+UI:
+- Aggiunte nuove sezioni nel FAQ
+- Modificata sezione di esportazione dati scansione per implementare la scelta del separatore per la formattazione in CSV.
+
+Backend:
+- Aggiunta funzionalità per salvare lo scan in formato CSV.
+- Aggiunte schermate per la sezione FAQ.
