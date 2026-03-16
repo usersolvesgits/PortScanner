@@ -2,7 +2,6 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
-using System.Windows;
 
 namespace PortScanner.Core.Models {
     public class TCP_Socket {
@@ -88,8 +87,8 @@ namespace PortScanner.Core.Models {
 
         /// <summary>
         /// Indica lo stato di connessione della porta.
-        /// Se impostato su <see langword="true"/> la porta è aperta.
-        /// Se impostato su <see langword="false"/> la porta non è aperta.
+        /// Se la stringa è "Aperta", allora la porta è aperta.
+        /// Se la stringa è "Chiusa", allora la porta è chiusa.
         /// </summary>
         public string StatoPorta { get; private set; }
 

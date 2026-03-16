@@ -72,3 +72,7 @@ UI:
 Backend:
 - Aggiunta funzionalità per salvare lo scan in formato CSV.
 - Aggiunte schermate per la sezione FAQ.
+
+### [16/03/2026]
+**Attività svolte**
+- Bug fixing
