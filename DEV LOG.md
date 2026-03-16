@@ -64,7 +64,7 @@ Backend:
 - Aggiornamenti backend
 - Modifiche della classe TCP_Socket
 
-**Funzinalità implementate**
+**Funzionalità implementate**
 UI:
 - Aggiunte nuove sezioni nel FAQ
 - Modificata sezione di esportazione dati scansione per implementare la scelta del separatore per la formattazione in CSV.
@@ -76,3 +76,16 @@ Backend:
 ### [16/03/2026]
 **Attività svolte**
 - Bug fixing
+- Aggiornamenti UI
+- Aggiornamenti backend
+
+**Funzionalità implementate**
+UI:
+- Aggiunto pulsante per terminare la scansione prematuramente.
+- Aggiunta una scrollbar per la navigazione dell'interfaccia.
+
+Backend:
+- Aggiunta funzionalità per la terminazione della scansione.
+- Aggiornata la logica di scansione e separata in due sezioni distinte (una per i controlli e l'altra per il loop di esecuzione principale), 
+  aggiunto un thread apposito per la scansione.
+- Aggiunte documentazioni per metodi.

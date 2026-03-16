@@ -2,6 +2,7 @@
  *  TODOS:
  *      -MainWindow.xaml.cs:
  *          -Scan_EsportaJSON()
+ *          -Scan_FermaScansione()
  */
 
 
@@ -25,24 +26,14 @@ namespace PortScanner {
         string target = String.Empty;
         int rangePortMin,
             rangePortMax;
-        bool scansioneAttiva = false;
+        bool scansioneAttiva = false,
+             richiestaFermataScansione = false;
 
         public MainWindow() {
             InitializeComponent();
             listaSockets = new();
             dtgScansioni.ItemsSource = listaSockets;
             txtIPAddress.Focus();
-        }
-
-        private void Esci(object sender, RoutedEventArgs e) {
-            Environment.Exit(0);
-        }
-
-        private void Crediti_Sviluppatore(object sender, RoutedEventArgs e) {
-            Util.OpenLink(urlSviluppatore);
-        }
-        private void Crediti_Azienda(object sender, RoutedEventArgs e) {
-            Util.OpenLink(urlAzienda);
         }
 
         protected override void OnClosing(CancelEventArgs e) {
@@ -60,6 +51,17 @@ namespace PortScanner {
                     e.Cancel = true;
                 }
             }
+        }
+
+        private void Esci(object sender, RoutedEventArgs e) {
+            Environment.Exit(0);
+        }
+
+        private void Crediti_Sviluppatore(object sender, RoutedEventArgs e) {
+            Util.OpenLink(urlSviluppatore);
+        }
+        private void Crediti_Azienda(object sender, RoutedEventArgs e) {
+            Util.OpenLink(urlAzienda);
         }
 
         private void Tema_Chiaro(object sender, RoutedEventArgs e) {
@@ -83,7 +85,18 @@ namespace PortScanner {
 #pragma warning restore WPF0001
         }
 
-        private bool CheckValidPort(string port) {
+        /// <summary>
+        /// Verifica se la stringa fornita rappresenta una porta valida.
+        /// La porta deve essere un numero compreso tra <see cref="IPEndPoint.MinPort"/> e <see cref="IPEndPoint.MaxPort"/>.
+        /// </summary>
+        /// <param name="port">
+        /// Stringa che rappresenta il numero di porta da controllare.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> se la porta è numerica e rientra nell'intervallo valido delle porte TCP/UDP;
+        /// <c>false</c> se la stringa è vuota, non numerica o fuori dall'intervallo consentito.
+        /// </returns>
+        private static bool CheckValidPort(string port) {
             if (string.IsNullOrWhiteSpace(port)) {
                 return false;
             }
@@ -107,8 +120,61 @@ namespace PortScanner {
             return true;
         }
 
+        /// <summary>
+        /// Metodo contenente la logica principale per il loop di scansione.
+        /// </summary>
+        private void Scan_Scansione() {
+            scansioneAttiva = true;
+            for (int currentPortNum = rangePortMin; currentPortNum <= rangePortMax; currentPortNum++) {
+                TCP_Socket socket = new(target, currentPortNum);
+                try {
+                    socket.Connect();
+                } catch (ArgumentNullException ex) {
+                    Debug.WriteLine(ex);
+                    MessageBox.Show("ERRORE: Uno dei campi inseriti è nullo!",
+                                    "Errore",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Error);
+                    return;
+                } catch (ArgumentOutOfRangeException ex) {
+                    Debug.WriteLine(ex);
+                    MessageBox.Show("ERRORE: Uno dei campi inseriti è al di fuori dei limiti consentiti!",
+                                    "Errore",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Error);
+                    return;
+                } catch (Exception ex) {
+                    Debug.WriteLine(ex);
+                    MessageBox.Show("ERRORE: Errore rilevato durante l'esecuzione del programma!",
+                                    "Errore",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Error);
+                    return;
+                }
+                //TODO -> migliorie fermata scansione
+                if (richiestaFermataScansione) {
+                    scansioneAttiva = false;
+                    richiestaFermataScansione = false;
+                    return;
+                }
+                Dispatcher.Invoke(() => 
+                    listaSockets.Add(socket)
+                );
+            }
+            scansioneAttiva = false;
+        }
         private void Scan_AvviaScansione(object sender, RoutedEventArgs e) {
             listaSockets.Clear();
+
+            if (string.IsNullOrWhiteSpace(txtIPAddress.Text)) {
+                MessageBox.Show("Attenzione: Inserire un hostname o indirizzo IP valido!",
+                                "Attenzione",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                txtIPAddress.Clear();
+                txtIPAddress.Focus();
+                return;
+            }
 
             target = txtIPAddress.Text.Trim().ToLower();
 
@@ -166,36 +232,22 @@ namespace PortScanner {
                 return;
             }
 
-            scansioneAttiva = true;
-            for (int currentPortNum = rangePortMin; currentPortNum <= rangePortMax; currentPortNum++) {
-                TCP_Socket socket = new(target, currentPortNum);
-                try {
-                    socket.Connect();
-                } catch (ArgumentNullException ex) {
-                    Debug.WriteLine(ex);
-                    MessageBox.Show("ERRORE: Uno dei campi inseriti è nullo!",
-                                    "Errore",
-                                    MessageBoxButton.OK,
-                                    MessageBoxImage.Error);
-                    return;
-                } catch (ArgumentOutOfRangeException ex) {
-                    Debug.WriteLine(ex);
-                    MessageBox.Show("ERRORE: Uno dei campi inseriti è al di fuori dei limiti consentiti!",
-                                    "Errore",
-                                    MessageBoxButton.OK,
-                                    MessageBoxImage.Error);
-                    return;
-                } catch (Exception ex) {
-                    Debug.WriteLine(ex);
-                    MessageBox.Show("ERRORE: Errore rilevato durante l'esecuzione del programma!",
-                                    "Errore",
-                                    MessageBoxButton.OK,
-                                    MessageBoxImage.Error);
-                    return;
-                }
-                listaSockets.Add(socket);
+            Thread threadScansione;
+            try {
+                threadScansione = new(new ThreadStart(Scan_Scansione));
+                threadScansione.Start();
+            } catch (Exception ex) {
+                Debug.WriteLine(ex);
+                MessageBox.Show("Errore: Errore rilevato durante l'avvio della scansione!",
+                                "Errore",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Error);
+                return;
             }
-            scansioneAttiva = false;
+        }
+        private void Scan_FermaScansione(object sender, RoutedEventArgs e) {
+            //TODO -> migliorie fermata scansione
+            richiestaFermataScansione = true;
         }
         private void Scan_EsportaCSV(object sender, RoutedEventArgs e) {
             if (listaSockets.Count == 0) {
@@ -247,10 +299,6 @@ namespace PortScanner {
             }
 
             if (string.IsNullOrWhiteSpace(filePath)) {
-                MessageBox.Show("Attenzione: Inserire un percorso file valido!",
-                                "Attenzione",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Warning);
                 return;
             }
 

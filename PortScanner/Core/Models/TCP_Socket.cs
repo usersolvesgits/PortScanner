@@ -121,7 +121,6 @@ namespace PortScanner.Core.Models {
         /// </summary>
         /// <param name="separatore">
         /// Carattere utilizzato come separatore tra i campi del file.
-        /// Il valore predefinito è una virgola (,).
         /// </param>
         /// <returns>
         /// Una stringa che rappresenta lo stato della porta nel formato:
@@ -141,7 +140,6 @@ namespace PortScanner.Core.Models {
         /// </param>
         /// <param name="separatore">
         /// Carattere utilizzato come separatore tra i campi del file.
-        /// Il valore predefinito è una virgola (,).
         /// </param>
         /// <returns>
         /// Una stringa che rappresenta lo stato della porta nel formato:
