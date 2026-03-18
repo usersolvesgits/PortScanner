@@ -88,7 +88,7 @@ namespace PortScanner.Core.Models {
         /// <summary>
         /// Indica lo stato di connessione della porta.
         /// Se la stringa è "Aperta", allora la porta è aperta.
-        /// Se la stringa è "Chiusa", allora la porta è chiusa.
+        /// Se la stringa è "Chiusa", allora la porta è chiusa o c'è un problema nella connessione verso tale porta.
         /// </summary>
         public string StatoPorta { get; private set; }
 

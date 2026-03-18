@@ -1,8 +1,14 @@
 ﻿/*
  *  TODOS:
+ *      -TCP_Socket:
+ *          -Cambiare prop "StatoPorta" nella TCP_Socket da string a bool
+ *           ed aggiornare metodo di visualizzazione nella datagrid
+ *          -Imparare i metodi async per aggiungerne uno
+ *      -MainWindow.xaml:
+ *          -Aggiungere opzioni
  *      -MainWindow.xaml.cs:
  *          -Scan_EsportaJSON()
- *          -Scan_FermaScansione()
+ *          -Aggiungere shortcuts per opzioni da aggiungere in xaml
  */
 
 
@@ -21,19 +27,24 @@ namespace PortScanner {
     public partial class MainWindow : Window {
         const string urlSviluppatore = "https://github.com/usersolvesgits";
         const string urlAzienda = "https://www.sirius.to.it/";
+        const int intervalloAggiornamentoProgressBar = 2;
 
         ObservableCollection<TCP_Socket> listaSockets;
         string target = String.Empty;
         int rangePortMin,
             rangePortMax;
+        int porteTotali = 0,
+            porteScansionate = 0;
         bool scansioneAttiva = false,
              richiestaFermataScansione = false;
+        int timeoutScansione;
 
         public MainWindow() {
             InitializeComponent();
             listaSockets = new();
             dtgScansioni.ItemsSource = listaSockets;
             txtIPAddress.Focus();
+            txtIPAddress.CaretIndex = txtIPAddress.Text.Length;
         }
 
         protected override void OnClosing(CancelEventArgs e) {
@@ -41,11 +52,11 @@ namespace PortScanner {
 
             if (scansioneAttiva) {
                 MessageBoxResult result = MessageBox.Show(
-                "Attenzione, sei sicuro di voler uscire?\nLa scansione non ha ancora finito",
-                "Attenzione!",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning
-            );
+                    "Attenzione, sei sicuro di voler uscire?\nLa scansione non ha ancora finito",
+                    "Attenzione!",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning
+                );
 
                 if (result == MessageBoxResult.No) {
                     e.Cancel = true;
@@ -96,7 +107,7 @@ namespace PortScanner {
         /// <c>true</c> se la porta è numerica e rientra nell'intervallo valido delle porte TCP/UDP;
         /// <c>false</c> se la stringa è vuota, non numerica o fuori dall'intervallo consentito.
         /// </returns>
-        private static bool CheckValidPort(string port) {
+        private bool CheckValidPort(string port) {
             if (string.IsNullOrWhiteSpace(port)) {
                 return false;
             }
@@ -124,11 +135,19 @@ namespace PortScanner {
         /// Metodo contenente la logica principale per il loop di scansione.
         /// </summary>
         private void Scan_Scansione() {
+            porteTotali = rangePortMax - rangePortMin + 1;
+            porteScansionate = 0;
+            Dispatcher.Invoke(() => 
+                prbProgressoScan.Value = 0
+            );
             scansioneAttiva = true;
+
             for (int currentPortNum = rangePortMin; currentPortNum <= rangePortMax; currentPortNum++) {
                 TCP_Socket socket = new(target, currentPortNum);
                 try {
                     socket.Connect();
+                    Thread.Sleep(timeoutScansione);
+                    porteScansionate++;
                 } catch (ArgumentNullException ex) {
                     Debug.WriteLine(ex);
                     MessageBox.Show("ERRORE: Uno dei campi inseriti è nullo!",
@@ -157,15 +176,25 @@ namespace PortScanner {
                     richiestaFermataScansione = false;
                     return;
                 }
-                Dispatcher.Invoke(() => 
+
+                Dispatcher.Invoke(() =>
                     listaSockets.Add(socket)
                 );
+
+                double progresso = (double)porteScansionate / porteTotali * 100;
+                if (porteScansionate % intervalloAggiornamentoProgressBar == 0 ||
+                    porteScansionate == porteTotali) {
+                    Dispatcher.Invoke(() =>
+                        prbProgressoScan.Value = progresso
+                    );
+                }
             }
             scansioneAttiva = false;
         }
         private void Scan_AvviaScansione(object sender, RoutedEventArgs e) {
             listaSockets.Clear();
 
+            //////HOSTNAME / IP-ADDRESS//////
             if (string.IsNullOrWhiteSpace(txtIPAddress.Text)) {
                 MessageBox.Show("Attenzione: Inserire un hostname o indirizzo IP valido!",
                                 "Attenzione",
@@ -175,9 +204,9 @@ namespace PortScanner {
                 txtIPAddress.Focus();
                 return;
             }
-
             target = txtIPAddress.Text.Trim().ToLower();
 
+            //////PORTE//////
             if (!CheckValidPort(txtPortMin.Text)) {
                 MessageBox.Show("Attenzione: Inserire un numero di porta valido!",
                                 "Attenzione",
@@ -187,7 +216,6 @@ namespace PortScanner {
                 txtPortMin.Focus();
                 return;
             }
-
             try {
                 rangePortMin = int.Parse(txtPortMin.Text);
             } catch (Exception ex) {
@@ -207,7 +235,6 @@ namespace PortScanner {
                 txtPortMax.Focus();
                 return;
             }
-
             try {
                 rangePortMax = int.Parse(txtPortMax.Text);
             } catch (Exception ex) {
@@ -232,6 +259,29 @@ namespace PortScanner {
                 return;
             }
 
+            //////TIMEOUT//////
+            string timeoutString = txtTimeout.Text.Trim();
+            if (string.IsNullOrWhiteSpace(timeoutString)) {
+                MessageBox.Show("Attenzione: Inserire un timeout in millisecondi!",
+                                "Attenzione",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                txtTimeout.Clear();
+                txtTimeout.Focus();
+                return;
+            }
+            bool check = int.TryParse(timeoutString, out timeoutScansione);
+            if (!check) {
+                MessageBox.Show("Attenzione: Inserire un timeout in millisecondi valido!",
+                                "Attenzione",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                txtTimeout.Clear();
+                txtTimeout.Focus();
+                return;
+            }
+
+            //////THREAD SCANSIONE//////
             Thread threadScansione;
             try {
                 threadScansione = new(new ThreadStart(Scan_Scansione));

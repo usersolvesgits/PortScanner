@@ -23,9 +23,9 @@ La struttura del progetto è stata pensata per la maggiore scalabilità possibil
 - Primi controlli
 
 **Funzionalità implementate**
-- Opzioni per uscire dall'applicazione
-- Opzioni per cambiare il tema dell'applicazione (Chiaro, Scuro e Tema di Sistema)
-- Aggiunti crediti sviluppatore ed azienda
+- Opzioni per uscire dall'applicazione.
+- Opzioni per cambiare il tema dell'applicazione (Chiaro, Scuro e Tema di Sistema).
+- Aggiunti crediti sviluppatore ed azienda.
 
 ### [07/03/2026]
 
@@ -34,11 +34,11 @@ La struttura del progetto è stata pensata per la maggiore scalabilità possibil
 - Modifiche della classe TCP_Socket
 
 **Funzionalità implementate**
-- Creata l'interfaccia grafica principale dell'applicazione
-- Creati metodi statici della classe TCP_Socket per la formattazione delle informazioni relative alle sockets in formati CSV e JSON
+- Creata l'interfaccia grafica principale dell'applicazione.
+- Creati metodi statici della classe TCP_Socket per la formattazione delle informazioni relative alle sockets in formati CSV e JSON.
 
 **Bug Fix**
-- Risolto bug che permetteva l'inserimento dall'esterno della proprietà "Servizio" nella classe TCP_Socket
+- Risolto bug che permetteva l'inserimento dall'esterno della proprietà "Servizio" nella classe TCP_Socket.
 
 ### [10/03/2026]
 
@@ -49,12 +49,12 @@ La struttura del progetto è stata pensata per la maggiore scalabilità possibil
 
 **Funzionalità implementate**
 UI:  
-- Aggiunta sezione FAQ
-- Aggiunta opzione per usare lo stile vecchio dell'applicazione
-- Mosse le opzioni di cambio del tema in un menù dedicato  
+- Aggiunta sezione FAQ.
+- Aggiunta opzione per usare lo stile vecchio dell'applicazione.
+- Mosse le opzioni di cambio del tema in un menù dedicato.
 
 Backend:  
-- Aggiunto loop di scansione di base
+- Aggiunto loop di scansione di base.
 - Modificato il metodo OnClosing() per attivare il messaggio di avvertimento solo quando una scansione non ha finito.
 
 ### [12/03/2026]
@@ -66,7 +66,7 @@ Backend:
 
 **Funzionalità implementate**
 UI:
-- Aggiunte nuove sezioni nel FAQ
+- Aggiunte nuove sezioni nel FAQ.
 - Modificata sezione di esportazione dati scansione per implementare la scelta del separatore per la formattazione in CSV.
 
 Backend:
@@ -74,6 +74,7 @@ Backend:
 - Aggiunte schermate per la sezione FAQ.
 
 ### [16/03/2026]
+
 **Attività svolte**
 - Bug fixing
 - Aggiornamenti UI
@@ -89,3 +90,18 @@ Backend:
 - Aggiornata la logica di scansione e separata in due sezioni distinte (una per i controlli e l'altra per il loop di esecuzione principale), 
   aggiunto un thread apposito per la scansione.
 - Aggiunte documentazioni per metodi.
+
+### [18/03/2026]
+
+**Attività svolte**
+- Aggiornamenti UI
+- Aggiornamenti backend
+
+**Funzionalità implementate**
+UI:
+- Aggiunta ProgressBar per rappresentare in maniera visiva i progressi della scansione.
+- Modificata la sezione di filtri ed ordinamento.
+
+Backend:
+- Aggiunta opzione per selezionare un timeout tra una scansione ed un'altra.
+- Aggiunta logica per aggiornare la ProgressBar durante la scansione.
