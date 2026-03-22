@@ -123,10 +123,15 @@ Backend:
 - Aggiunte shortcuts per le opzioni nel menù.
 - Aggiunta logica iniziale di ordinamento e filtraggio delle porte.
 - Aggiunta logica per visualizzare le statistiche di una scansione.
+- Modificata la logica dell'esportazione CSV per agire in base a ciò che è presente nella datagrid, e non su quanto presente nella lista di socket.
 
 Util:
-- Spostato il metodo "CheckValidPort(string url)" da MainWindow.xaml.cs a Util.cs.
+- Spostato il metodo "CheckValidPort(string port)" da MainWindow.xaml.cs a Util.cs.
 
 TCP_Socket:
 - Aggiunta nuova proprietà booleana "IsOpen".
 - Reso il dizionario per l'individuazione di servizi conosciuti pubblico.
+
+**Minor Fixes**
+- Modificato il tipo di cursore quando si è sopra i bottoni di esportazione.
+- Modificata della documentazione nella classe TCP_Socket.

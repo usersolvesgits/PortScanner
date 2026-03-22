@@ -336,7 +336,7 @@ namespace PortScanner {
         }
         
         private void Esportazione_CSV(object sender, RoutedEventArgs e) {
-            if (listaSockets.Count == 0) {
+            if (dtgScansioni.Items.Count == 0) {
                 MessageBox.Show("Attenzione: Nessun elemento da esportare trovato!",
                                 "Attenzione",
                                 MessageBoxButton.OK,
@@ -374,7 +374,7 @@ namespace PortScanner {
 
             SaveFileDialog dlg = new() {
                 Title = "Esporta",
-                Filter = "CSV file (*.csv)|*.csv| All Files (*.*)|*.*",
+                Filter = "CSV File (*.csv)|*.csv",
                 DefaultExt = ".csv",
                 AddExtension = true
             };
@@ -388,10 +388,12 @@ namespace PortScanner {
                 return;
             }
 
+            var dtgItems = dtgScansioni.ItemsSource as List<TCP_Socket>;
+
             try {
                 using (StreamWriter writer = new StreamWriter(filePath)) {
                     for (int i = 0; i < dtgScansioni.Items.Count; i++) {
-                        var socket = dtgScansioni.Items[i] as TCP_Socket;
+                        var socket = dtgItems[i] as TCP_Socket;
                         if (i == 0) {
                             writer.WriteLine($"Target: {socket.IPAddress?.ToString()}");
                             writer.WriteLine($"Stato della porta{separatoreCSV}Numero della porta{separatoreCSV}Servizio rilevato");
@@ -409,7 +411,7 @@ namespace PortScanner {
             }
         }
         private void Esportazione_JSON(object sender, RoutedEventArgs e) {
-            //TODO -> logica esporto JSON
+            //TODO -> logica esportazione JSON
         }
 
         private void OpzioniScansione_CambioFiltro(object sender, SelectionChangedEventArgs e) {

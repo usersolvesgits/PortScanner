@@ -8,6 +8,9 @@ namespace PortScanner.Core.Models {
         private int _numPorta;
         private bool _statoPorta;
 
+        /// <summary>
+        /// Dizionario dove il numero della porta corrisponde ad un servizio noto.
+        /// </summary>
         public static readonly IReadOnlyDictionary<int, string> ServiziConosciuti = new Dictionary<int, string>() {
             { 20, "FTP Data" }, { 21, "FTP" }, { 22, "SSH" }, { 23, "Telnet" }, { 25, "SMTP" },
             { 53, "DNS" },
@@ -144,7 +147,7 @@ namespace PortScanner.Core.Models {
         /// </param>
         /// <returns>
         /// Una stringa che rappresenta lo stato della porta nel formato:
-        /// <c>IsOpen,NumeroPorta,Servizio</c>.
+        /// <c><see cref="IsOpen"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>.
         /// </returns>
         public static string ToCSV(TCP_Socket socket, char separatore) {
             return $"{socket.StatoPorta}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
@@ -163,9 +166,9 @@ namespace PortScanner.Core.Models {
         /// </param>
         /// <returns>
         /// Una stringa che rappresenta lo stato della porta nel formato:
-        /// <c>IsOpen,NumeroPorta,Servizio</c>
+        /// <c><see cref="IsOpen"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>
         /// oppure
-        /// <c>IPAddres,IsOpen,NumeroPorta,Servizio</c>
+        /// <c><see cref="IPAddress">,<see cref="IsOpen"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>
         /// se <paramref name="ShowIPAddress"/> è <see langword="true"/>.
         /// </returns>
         public static string ToCSV(TCP_Socket socket, char separatore, bool ShowIPAddress) {
@@ -176,15 +179,12 @@ namespace PortScanner.Core.Models {
         }
 
         /// <summary>
-        /// Formatta le informazioni di un oggetto TCP_Socket in una stringa JSON.
+        /// Formatta le informazioni di un oggetto <see cref="TCP_Socket"/> in una stringa JSON.
         /// </summary>
-        /// <param name="socket">Un oggetto TCP_Socket da convertire in formato JSON.</param>
-        /// <returns>Una stringa contenente la rappresentazione JSON del TCP_Socket specificato.</returns>
+        /// <param name="socket">Un oggetto <see cref="TCP_Socket"/> da convertire in formato JSON.</param>
+        /// <returns>Una stringa contenente la rappresentazione JSON del <see cref="TCP_Socket"/> specificato.</returns>
         public static string ToJSON(TCP_Socket socket) {
-            JsonSerializerOptions opzioni = new() {
-                WriteIndented = true
-            };
-            return JsonSerializer.Serialize(socket, opzioni);
+            return JsonSerializer.Serialize(socket);
         }
 
         /// <summary>
