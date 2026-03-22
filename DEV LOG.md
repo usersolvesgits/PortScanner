@@ -118,6 +118,7 @@ Backend:
 UI:
 - Aggiunti nuovi comandi nel menù opzioni.
 - Aggiunte le shortcuts per le azioni del menù.
+- Aggiunta nuova modalità di visualizzazione dello stato della porta.
 
 Backend:
 - Aggiunte shortcuts per le opzioni nel menù.
@@ -132,6 +133,11 @@ TCP_Socket:
 - Aggiunta nuova proprietà booleana "IsOpen".
 - Reso il dizionario per l'individuazione di servizi conosciuti pubblico.
 
+**Bug Fix**
+- Risolto bug che non permetteva l'esportazione del risultato della scansione.
+
 **Minor Fixes**
 - Modificato il tipo di cursore quando si è sopra i bottoni di esportazione.
 - Modificata della documentazione nella classe TCP_Socket.
+- Rimossa l'opzione per scorrere tra le opzioni di filtraggio ed ordinamento usando la rotellina mouse.
+- Modificata la larghezza base dell'applicazione.

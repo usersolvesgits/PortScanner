@@ -388,12 +388,10 @@ namespace PortScanner {
                 return;
             }
 
-            var dtgItems = dtgScansioni.ItemsSource as List<TCP_Socket>;
-
             try {
                 using (StreamWriter writer = new StreamWriter(filePath)) {
                     for (int i = 0; i < dtgScansioni.Items.Count; i++) {
-                        var socket = dtgItems[i] as TCP_Socket;
+                        var socket = dtgScansioni.Items[i] as TCP_Socket;
                         if (i == 0) {
                             writer.WriteLine($"Target: {socket.IPAddress?.ToString()}");
                             writer.WriteLine($"Stato della porta{separatoreCSV}Numero della porta{separatoreCSV}Servizio rilevato");
@@ -470,6 +468,9 @@ namespace PortScanner {
                     break;
             }
             dtgScansioni.ItemsSource = listaSockets;
+        }
+        private void OpzioniScansione_MouseWheel(object sender, MouseWheelEventArgs e) {
+            e.Handled = true;
         }
 
         private void FAQ_PortScanner(object sender, RoutedEventArgs e) {
