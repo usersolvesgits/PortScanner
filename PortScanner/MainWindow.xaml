@@ -7,7 +7,8 @@
         mc:Ignorable="d"
         Title="Port Scanner" Icon="/Assets/Icons/windmill.ico"
         WindowStartupLocation="CenterScreen"
-        Height="500" Width="1000" MinHeight="500" MinWidth="800">
+        Height="500" Width="1000" MinHeight="500" MinWidth="800"
+        PreviewKeyDown="PortScanner_ShortCuts">
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
@@ -16,12 +17,20 @@
 
 		<Menu Grid.Row="0">
 			<MenuItem Header="Opzioni">
-				<MenuItem Header="Esci" Click="Esci" InputGestureText="Alt + F4"/>
-			</MenuItem>
+                <MenuItem Header="Scansione">
+                    <MenuItem Header="Avvia Scansione" Click="Scan_AvviaScansione" InputGestureText="Ctrl + R"/>
+                    <MenuItem Header="Ferma Scansione" Click="Scan_FermaScansione" InputGestureText="Ctrl + S"/>
+                </MenuItem>
+                <MenuItem Header="Esporta">
+                    <MenuItem Header="Esporta CSV" Click="Esportazione_CSV" InputGestureText="Ctrl + Alt + C"/>
+                    <MenuItem Header="Esporta JSON" Click="Esportazione_JSON" InputGestureText="Ctrl + Alt + J"/>
+                </MenuItem>
+                <MenuItem Header="Esci" Click="Esci" InputGestureText="Ctrl + Q"/>
+            </MenuItem>
 			<MenuItem Header="Visualizza">
 				<MenuItem Header="Temi">
-					<MenuItem Header="Tema Chiaro" Click="Tema_Chiaro"/>
-					<MenuItem Header="Tema Scuro" Click="Tema_Scuro"/>
+					<MenuItem Header="Tema Chiaro" Click="Tema_Chiaro" InputGestureText="Ctrl + L"/>
+					<MenuItem Header="Tema Scuro" Click="Tema_Scuro" InputGestureText="Ctrl + D"/>
                     <MenuItem Header="Tema di Sistema" Click="Tema_Sistema"/>
                 </MenuItem>
                 <MenuItem Header="Vecchio stile" Click="Tema_Vecchio"/>
@@ -34,8 +43,8 @@
                     <MenuItem Header="È legale usare un port scanner?" Click="FAQ_Legale"/>
                 </MenuItem>
                 <MenuItem Header="Crediti">
-                    <MenuItem Header="Lo sviluppatore" Click="Crediti_Sviluppatore"/>
-                    <MenuItem Header="L'azienda" Click="Crediti_Azienda"/>
+                    <MenuItem Header="Lo sviluppatore" Click="Crediti_Sviluppatore" InputGestureText="Ctrl + Alt + S"/>
+                    <MenuItem Header="L'azienda" Click="Crediti_Azienda" InputGestureText="Ctrl + Alt + A"/>
                 </MenuItem>
             </MenuItem>
 		</Menu>
@@ -66,32 +75,33 @@
                         <TextBlock Text="Timeout tra una connessione e l'altra (ms):"/>
                         <TextBox Name="txtTimeout" Margin="0,5,0,10" Text="500"/>
 
-                        <Button Content="Avvia Scansione" Click="Scan_AvviaScansione" 
-                                HorizontalAlignment="Stretch" Height="30" Margin="0,10,0,0"/>
+                        <Button Name="btnAvviaScansione" Content="Avvia Scansione" Click="Scan_AvviaScansione" 
+                                HorizontalAlignment="Stretch" Height="30" Margin="0,10,0,0" Cursor="Hand"/>
                         <Button Content="Ferma Scansione" Click="Scan_FermaScansione" 
-                                HorizontalAlignment="Stretch" Height="30" Margin="0,10,0,0"/>
+                                HorizontalAlignment="Stretch" Height="30" Margin="0,10,0,0" Cursor="Hand"/>
 
                         <Separator Margin="0,10,0,10"/>
 
                         <TextBlock Text="Filtri / Ordinamento" FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
                         <TextBlock Text="Filtra per:"/>
-                        <ComboBox Name="cmbFiltri" Margin="0,0,0,5">
+                        <ComboBox Name="cmbFiltri" Margin="0,0,0,5" SelectionChanged="OpzioniScansione_CambioFiltro">
                             <ComboBoxItem Content="Nessun Filtro" IsSelected="True"/>
                             <ComboBoxItem Content="Porte Aperte"/>
-                            <ComboBoxItem Content="Porta Chiusa"/>
+                            <ComboBoxItem Content="Porte Chiuse"/>
+                            <ComboBoxItem Content="Servizi Rilevati"/>
                         </ComboBox>
                         <TextBlock Text="Ordina per:"/>
-                        <ComboBox Name="cmbOrdina" Margin="0,0,0,5">
+                        <ComboBox Name="cmbOrdina" Margin="0,0,0,5" SelectionChanged="OpzioniScansione_CambioOrdinamento">
                             <ComboBoxItem Content="Nessun Ordinamento" IsSelected="True"/>
-                            <ComboBoxItem Content="Numero Porta"/>
-                            <ComboBoxItem Content="Stato Porta"/>
+                            <ComboBoxItem Content="Stato Porta (Aperte - Chiuse)"/>
+                            <ComboBoxItem Content="Stato Porta (Chiuse - Aperte)"/>
                         </ComboBox>
 
                         <Separator Margin="0,10,0,10"/>
 
                         <TextBlock Text="Esporta Risultati" FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
                         <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                            <Button Name="btnEsportaCSV" Content="Esporta CSV" Click="Scan_EsportaCSV"
+                            <Button Name="btnEsportaCSV" Content="Esporta CSV" Click="Esportazione_CSV"
 								    Height="30" Width="110" HorizontalAlignment="Stretch"/>
 
                             <TextBlock Text="Separatore:" VerticalAlignment="Center" Margin="10,0,5,0"/>
@@ -100,7 +110,7 @@
                                      Width="60" Height="30" 
                                      VerticalContentAlignment="Center"/>
                         </StackPanel>
-                        <Button Name="btnEsportaJSON" Content="Esporta JSON" Click="Scan_EsportaJSON" 
+                        <Button Name="btnEsportaJSON" Content="Esporta JSON" Click="Esportazione_JSON" 
                                 Height="30" Margin="0,5,0,0" HorizontalAlignment="Stretch"/>
                     </StackPanel>
                 </ScrollViewer>
@@ -125,7 +135,7 @@
                         <ProgressBar Name="prbProgressoScan" Height="10" IsIndeterminate="False"
                                      Minimum="0" Maximum="100" Margin="0, 0, 0, 10"/>
                         <TextBlock Name="txtDurata" Text="Durata: 0 ms"/>
-						<TextBlock Name="txtPorteTrovate" Text="Porte Aperte: 0"/>
+						<TextBlock Name="txtPorteAperte" Text="Porte Aperte: 0"/>
 						<TextBlock Name="txtTotalePorte" Text="Totale Porte Scansionate: 0"/>
 					</StackPanel>
 				</Grid>

@@ -105,3 +105,28 @@ UI:
 Backend:
 - Aggiunta opzione per selezionare un timeout tra una scansione ed un'altra.
 - Aggiunta logica per aggiornare la ProgressBar durante la scansione.
+
+### [22/03/2026]
+
+**Attività svolte**
+- Aggiornamenti UI
+- Aggiornamenti backend
+- Modifiche della classe TCP_Socket
+- Modifiche della classe Util
+
+**Funzionalità implementate**
+UI:
+- Aggiunti nuovi comandi nel menù opzioni.
+- Aggiunte le shortcuts per le azioni del menù.
+
+Backend:
+- Aggiunte shortcuts per le opzioni nel menù.
+- Aggiunta logica iniziale di ordinamento e filtraggio delle porte.
+- Aggiunta logica per visualizzare le statistiche di una scansione.
+
+Util:
+- Spostato il metodo "CheckValidPort(string url)" da MainWindow.xaml.cs a Util.cs.
+
+TCP_Socket:
+- Aggiunta nuova proprietà booleana "IsOpen".
+- Reso il dizionario per l'individuazione di servizi conosciuti pubblico.

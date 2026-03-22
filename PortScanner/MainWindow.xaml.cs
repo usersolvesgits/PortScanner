@@ -1,14 +1,10 @@
 ﻿/*
  *  TODOS:
  *      -TCP_Socket:
- *          -Cambiare prop "StatoPorta" nella TCP_Socket da string a bool
- *           ed aggiornare metodo di visualizzazione nella datagrid
  *          -Imparare i metodi async per aggiungerne uno
- *      -MainWindow.xaml:
- *          -Aggiungere opzioni
  *      -MainWindow.xaml.cs:
- *          -Scan_EsportaJSON()
- *          -Aggiungere shortcuts per opzioni da aggiungere in xaml
+ *          -Esportazione_JSON()
+ *          -Rifare il metodo di fermata della scansione
  */
 
 
@@ -17,9 +13,10 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
 using System.Windows;
 using PortScanner.Core.Models;
+using System.Windows.Input;
+using SelectionChangedEventArgs = System.Windows.Controls.SelectionChangedEventArgs;
 using Util = PortScanner.Core.Utils.Util;
 
 
@@ -29,19 +26,32 @@ namespace PortScanner {
         const string urlAzienda = "https://www.sirius.to.it/";
         const int intervalloAggiornamentoProgressBar = 2;
 
-        ObservableCollection<TCP_Socket> listaSockets;
+        enum OpzioniFiltri {
+            Nessuno,
+            PorteAperte,
+            PorteChiuse,
+            ServiziRilevati,
+        }
+        enum OpzioniOrdinamenti {
+            Nessuno,
+            PorteAperteChiuse,
+            PorteChiuseAperte,
+        }
+
+        ObservableCollection<TCP_Socket> listaSockets = new();
         string target = String.Empty;
         int rangePortMin,
             rangePortMax;
-        int porteTotali = 0,
+        int porteTotali = 0, porteTotaliPrecedenti = 0,
+            porteAperte = 0,
             porteScansionate = 0;
+        long durataScansione_l = 0;
         bool scansioneAttiva = false,
              richiestaFermataScansione = false;
         int timeoutScansione;
 
         public MainWindow() {
             InitializeComponent();
-            listaSockets = new();
             dtgScansioni.ItemsSource = listaSockets;
             txtIPAddress.Focus();
             txtIPAddress.CaretIndex = txtIPAddress.Text.Length;
@@ -60,6 +70,52 @@ namespace PortScanner {
 
                 if (result == MessageBoxResult.No) {
                     e.Cancel = true;
+                }
+            }
+        }
+        private void PortScanner_ShortCuts(object sender, KeyEventArgs e) {
+            if (Keyboard.Modifiers == ModifierKeys.Control) {
+                switch (e.Key) {
+                    case Key.Q:
+                        Esci(null, null);
+                        e.Handled = true;
+                        break;
+                    case Key.R:
+                        Scan_AvviaScansione(null, null);
+                        e.Handled = true;
+                        break;
+                    case Key.S:
+                        Scan_FermaScansione(null, null);
+                        e.Handled = true;
+                        break;
+                    case Key.L:
+                        Tema_Chiaro(null, null);
+                        e.Handled = true;
+                        break;
+                    case Key.D:
+                        Tema_Scuro(null, null);
+                        e.Handled = true;
+                        break;
+                }
+            }
+            if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Alt)) {
+                switch (e.Key) {
+                    case Key.A:
+                        Crediti_Azienda(null, null);
+                        e.Handled = true;
+                        break;
+                    case Key.S:
+                        Crediti_Sviluppatore(null, null);
+                        e.Handled = true;
+                        break;
+                    case Key.C:
+                        Esportazione_CSV(null, null);
+                        e.Handled = true;
+                        break;
+                    case Key.J:
+                        Esportazione_JSON(null, null);
+                        e.Handled = true;
+                        break;
                 }
             }
         }
@@ -97,73 +153,42 @@ namespace PortScanner {
         }
 
         /// <summary>
-        /// Verifica se la stringa fornita rappresenta una porta valida.
-        /// La porta deve essere un numero compreso tra <see cref="IPEndPoint.MinPort"/> e <see cref="IPEndPoint.MaxPort"/>.
-        /// </summary>
-        /// <param name="port">
-        /// Stringa che rappresenta il numero di porta da controllare.
-        /// </param>
-        /// <returns>
-        /// <c>true</c> se la porta è numerica e rientra nell'intervallo valido delle porte TCP/UDP;
-        /// <c>false</c> se la stringa è vuota, non numerica o fuori dall'intervallo consentito.
-        /// </returns>
-        private bool CheckValidPort(string port) {
-            if (string.IsNullOrWhiteSpace(port)) {
-                return false;
-            }
-
-            int portInt = -1;
-            try {
-                portInt = int.Parse(port);
-            } catch (Exception ex) {
-                Debug.WriteLine(ex);
-                MessageBox.Show("Attenzione: Assicurarsi che il valore inserito sia numerico!",
-                                "Attenzione",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Warning);
-                return false;
-            }
-
-            if (portInt < IPEndPoint.MinPort || portInt > IPEndPoint.MaxPort) {
-                return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
         /// Metodo contenente la logica principale per il loop di scansione.
         /// </summary>
         private void Scan_Scansione() {
             porteTotali = rangePortMax - rangePortMin + 1;
+            Dispatcher.Invoke(() => {
+                txtTotalePorte.Text = txtTotalePorte.Text.Replace(porteTotaliPrecedenti.ToString(), porteTotali.ToString());
+                txtDurata.Text = txtDurata.Text.Replace(durataScansione_l.ToString(), "0");
+                txtPorteAperte.Text = txtPorteAperte.Text.Replace(porteAperte.ToString(), "0");
+                prbProgressoScan.Value = 0;
+            });
             porteScansionate = 0;
-            Dispatcher.Invoke(() => 
-                prbProgressoScan.Value = 0
-            );
+            porteAperte = 0;
+            int porteApertePrecedente = 0;
+            porteTotaliPrecedenti = porteTotali;
             scansioneAttiva = true;
+
+            Stopwatch durataScansione = new();
+            durataScansione.Start();
 
             for (int currentPortNum = rangePortMin; currentPortNum <= rangePortMax; currentPortNum++) {
                 TCP_Socket socket = new(target, currentPortNum);
                 try {
                     socket.Connect();
+                    if (socket.IsOpen) {
+                        porteAperte++;
+                    }
                     Thread.Sleep(timeoutScansione);
                     porteScansionate++;
-                } catch (ArgumentNullException ex) {
-                    Debug.WriteLine(ex);
-                    MessageBox.Show("ERRORE: Uno dei campi inseriti è nullo!",
-                                    "Errore",
-                                    MessageBoxButton.OK,
-                                    MessageBoxImage.Error);
-                    return;
-                } catch (ArgumentOutOfRangeException ex) {
-                    Debug.WriteLine(ex);
-                    MessageBox.Show("ERRORE: Uno dei campi inseriti è al di fuori dei limiti consentiti!",
-                                    "Errore",
-                                    MessageBoxButton.OK,
-                                    MessageBoxImage.Error);
-                    return;
                 } catch (Exception ex) {
                     Debug.WriteLine(ex);
+                    durataScansione.Stop();
+                    Dispatcher.Invoke(() => {
+                        txtDurata.Text = txtDurata.Text.Replace(durataScansione_l.ToString(), "0");
+                        txtPorteAperte.Text = txtPorteAperte.Text.Replace(porteAperte.ToString(), "0");
+                        prbProgressoScan.Value = 0;
+                    });
                     MessageBox.Show("ERRORE: Errore rilevato durante l'esecuzione del programma!",
                                     "Errore",
                                     MessageBoxButton.OK,
@@ -177,18 +202,28 @@ namespace PortScanner {
                     return;
                 }
 
-                Dispatcher.Invoke(() =>
-                    listaSockets.Add(socket)
-                );
+                Dispatcher.BeginInvoke(() => {
+                    listaSockets.Add(socket);
+                    txtPorteAperte.Text = txtPorteAperte.Text.Replace(porteApertePrecedente.ToString(), porteAperte.ToString());
+                });
+
+                if (socket.IsOpen) {
+                    porteApertePrecedente++;
+                }
 
                 double progresso = (double)porteScansionate / porteTotali * 100;
                 if (porteScansionate % intervalloAggiornamentoProgressBar == 0 ||
                     porteScansionate == porteTotali) {
-                    Dispatcher.Invoke(() =>
-                        prbProgressoScan.Value = progresso
-                    );
+                    Dispatcher.Invoke(() => { 
+                        prbProgressoScan.Value = progresso; 
+                    });
                 }
             }
+            durataScansione.Stop();
+            durataScansione_l = durataScansione.ElapsedMilliseconds;
+            Dispatcher.Invoke(() => {
+                txtDurata.Text = txtDurata.Text.Replace("0", durataScansione_l.ToString());
+            });
             scansioneAttiva = false;
         }
         private void Scan_AvviaScansione(object sender, RoutedEventArgs e) {
@@ -207,7 +242,7 @@ namespace PortScanner {
             target = txtIPAddress.Text.Trim().ToLower();
 
             //////PORTE//////
-            if (!CheckValidPort(txtPortMin.Text)) {
+            if (!Util.CheckValidPort(txtPortMin.Text)) {
                 MessageBox.Show("Attenzione: Inserire un numero di porta valido!",
                                 "Attenzione",
                                 MessageBoxButton.OK,
@@ -226,7 +261,7 @@ namespace PortScanner {
                 return;
             }
 
-            if (!CheckValidPort(txtPortMax.Text)) {
+            if (!Util.CheckValidPort(txtPortMax.Text)) {
                 MessageBox.Show("Attenzione: Inserire un numero di porta valido!",
                                 "Attenzione",
                                 MessageBoxButton.OK,
@@ -299,7 +334,8 @@ namespace PortScanner {
             //TODO -> migliorie fermata scansione
             richiestaFermataScansione = true;
         }
-        private void Scan_EsportaCSV(object sender, RoutedEventArgs e) {
+        
+        private void Esportazione_CSV(object sender, RoutedEventArgs e) {
             if (listaSockets.Count == 0) {
                 MessageBox.Show("Attenzione: Nessun elemento da esportare trovato!",
                                 "Attenzione",
@@ -354,12 +390,12 @@ namespace PortScanner {
 
             try {
                 using (StreamWriter writer = new StreamWriter(filePath)) {
-                    for (int i = 0; i < listaSockets.Count; i++) {
+                    for (int i = 0; i < dtgScansioni.Items.Count; i++) {
+                        var socket = dtgScansioni.Items[i] as TCP_Socket;
                         if (i == 0) {
-                            writer.WriteLine($"Target: {listaSockets[i].IPAddress?.ToString()}");
+                            writer.WriteLine($"Target: {socket.IPAddress?.ToString()}");
                             writer.WriteLine($"Stato della porta{separatoreCSV}Numero della porta{separatoreCSV}Servizio rilevato");
                         }
-                        TCP_Socket socket = listaSockets[i];
                         writer.WriteLine(TCP_Socket.ToCSV(socket, separatoreCSV));
                     }
                 }
@@ -372,8 +408,66 @@ namespace PortScanner {
                 return;
             }
         }
-        private void Scan_EsportaJSON(object sender, RoutedEventArgs e) {
+        private void Esportazione_JSON(object sender, RoutedEventArgs e) {
             //TODO -> logica esporto JSON
+        }
+
+        private void OpzioniScansione_CambioFiltro(object sender, SelectionChangedEventArgs e) {
+            if (listaSockets.Count == 0) {
+                return;
+            }
+
+            switch ((OpzioniFiltri)cmbFiltri.SelectedIndex) {
+                case OpzioniFiltri.Nessuno:
+                    dtgScansioni.ItemsSource = listaSockets;
+                    break;
+                case OpzioniFiltri.PorteAperte:
+                    dtgScansioni.ItemsSource = listaSockets;
+                    ObservableCollection<TCP_Socket> listaPorteAperte = new();
+                    foreach (TCP_Socket socket in listaSockets) {
+                        if (socket.IsOpen) {
+                            listaPorteAperte.Add(socket);
+                        }
+                    }
+                    dtgScansioni.ItemsSource = listaPorteAperte;
+                    break;
+                case OpzioniFiltri.PorteChiuse:
+                    ObservableCollection<TCP_Socket> listaPorteChiuse = new();
+                    foreach (TCP_Socket socket in listaSockets) {
+                        if (!socket.IsOpen) {
+                            listaPorteChiuse.Add(socket);
+                        }
+                    }
+                    dtgScansioni.ItemsSource = listaPorteChiuse;
+                    break;
+                case OpzioniFiltri.ServiziRilevati:
+                    ObservableCollection<TCP_Socket> listaServiziRilevati = new();
+                    foreach (TCP_Socket socket in listaSockets) {
+                        if (TCP_Socket.ServiziConosciuti.ContainsKey(socket.NumeroPorta)) {
+                            listaServiziRilevati.Add(socket);
+                        }
+                    }
+                    dtgScansioni.ItemsSource = listaServiziRilevati;
+                    break;
+            }
+        }
+        private void OpzioniScansione_CambioOrdinamento(object sender, SelectionChangedEventArgs e) {
+            if (listaSockets.Count == 0) {
+                return;
+            }
+
+            switch ((OpzioniOrdinamenti)cmbOrdina.SelectedIndex) {
+                case OpzioniOrdinamenti.Nessuno:
+                    listaSockets = new(listaSockets.OrderBy(s => s.NumeroPorta));
+                    break;
+                case OpzioniOrdinamenti.PorteAperteChiuse:
+                    listaSockets = new(listaSockets.OrderByDescending(s => s.IsOpen));
+                    break;
+                case OpzioniOrdinamenti.PorteChiuseAperte:
+                    listaSockets = new(listaSockets.OrderBy(s => s.IsOpen));
+                    break;
+            }
+            dtgScansioni.ItemsSource = listaSockets;
         }
 
         private void FAQ_PortScanner(object sender, RoutedEventArgs e) {

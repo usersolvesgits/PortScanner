@@ -6,7 +6,9 @@ using System.Text.Json;
 namespace PortScanner.Core.Models {
     public class TCP_Socket {
         private int _numPorta;
-        private static readonly IReadOnlyDictionary<int, string> _serviziConosciuti = new Dictionary<int, string>() {
+        private bool _statoPorta;
+
+        public static readonly IReadOnlyDictionary<int, string> ServiziConosciuti = new Dictionary<int, string>() {
             { 20, "FTP Data" }, { 21, "FTP" }, { 22, "SSH" }, { 23, "Telnet" }, { 25, "SMTP" },
             { 53, "DNS" },
             { 67, "DHCP" }, { 68, "DHCP" }, { 69, "TFTP" },
@@ -71,11 +73,11 @@ namespace PortScanner.Core.Models {
         /// </summary>
         public int NumeroPorta {
             get { return _numPorta; }
-            set {
+            private set {
                 if (value < IPEndPoint.MinPort || value > IPEndPoint.MaxPort) {
                     throw new ArgumentOutOfRangeException(nameof(value), $"Il valore inserito deve essere un numero compreso tra {IPEndPoint.MinPort} e {IPEndPoint.MaxPort}!");
                 } else {
-                    if (_serviziConosciuti.TryGetValue(value, out string Servizio)) {
+                    if (ServiziConosciuti.TryGetValue(value, out string Servizio)) {
                         this.Servizio = Servizio;
                     } else {
                         this.Servizio = "Sconosciuto";
@@ -91,6 +93,24 @@ namespace PortScanner.Core.Models {
         /// Se la stringa è "Chiusa", allora la porta è chiusa o c'è un problema nella connessione verso tale porta.
         /// </summary>
         public string StatoPorta { get; private set; }
+
+        /// <summary>
+        /// Indica lo stato di connessione di una porta come valore booleano.
+        /// Se impostato su <see langword="true"/> la porta è aperta.
+        /// Se impostato su <see langword="false"/> la porta è chiusa.
+        /// </summary>
+        public bool IsOpen {
+            get { return _statoPorta; }
+            private set {
+                if (value) {
+                    _statoPorta = true;
+                    StatoPorta = "Aperta";
+                } else {
+                    _statoPorta = false;
+                    StatoPorta = "Chiusa";
+                }
+            }
+        }
 
         /// <summary>
         /// Indica che tipo di servizio viene usato in quale porta.
@@ -174,10 +194,10 @@ namespace PortScanner.Core.Models {
             using (TcpClient TcpC = new()) {
                 try {
                     TcpC.Connect(IPAddress, NumeroPorta);
-                    StatoPorta = "Aperta";
+                    IsOpen = true;
                 }  catch (SocketException ex) {
                     Debug.WriteLine($"Porta numero {NumeroPorta} non raggiungibile!\n{ex}");
-                    StatoPorta = "Chiusa";
+                    IsOpen = false;
                 }
             }
         }
