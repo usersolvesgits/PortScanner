@@ -22,11 +22,14 @@ namespace PortScanner.Core.Models {
             { 143, "IMAP" },
             { 161, "SNMP" },
             { 179, "BGP" },
+            { 194, "IRC" },
             { 389, "LDAP" },
             { 443, "HTTPS" },
             { 445, "SMB" },
             { 465, "SMTPS" },
             { 500, "ISAKMP" },
+            { 514, "Syslog" }, { 515, "LPD" },
+            { 520, "RIP" },
             { 587, "SMTP Submission" },
             { 636, "LDAPS" },
             { 989, "FTPS Data" },
@@ -34,14 +37,19 @@ namespace PortScanner.Core.Models {
             { 1433, "SQL Server" },
             { 1521, "Oracle DB" },
             { 2049, "NFS" },
-            { 2082, "cPanel" }, { 2083, "cPanel SSL" },
+            { 2082, "cPanel" }, { 2083, "cPanel SSL" }, { 2086, "WHM" }, { 2087, "WHM SSL" },
             { 2181, "Zookeeper" },
+            { 2375, "Docker" }, { 2376, "Docker SSL" },
             { 2483, "Oracle SSL" }, { 2484, "Oracle TCPS" },
             { 3000, "Dev Server" },
             { 3306, "MySQL" },
             { 3389, "RDP" },
             { 3690, "Subversion" },
+            { 4000, "Dev Server" },
             { 4444, "Metasploit" },
+            { 4567, "Sinatra" },
+            { 5000, "Flask Dev Server" },
+            { 5060, "SIP" }, { 5061, "SIP TLS" },
             { 5432, "PostgreSQL" },
             { 5601, "Kibana" },
             { 5672, "RabbitMQ" },
@@ -58,6 +66,7 @@ namespace PortScanner.Core.Models {
             { 9092, "Kafka" },
             { 9200, "Elasticsearch" },
             { 9418, "Git" },
+            { 9999, "Debug/Dev" },
             { 27017, "MongoDB" }
         };
 
@@ -195,7 +204,25 @@ namespace PortScanner.Core.Models {
                 try {
                     TcpC.Connect(IPAddress, NumeroPorta);
                     IsOpen = true;
-                }  catch (SocketException ex) {
+                } catch (SocketException ex) {
+                    Debug.WriteLine($"Porta numero {NumeroPorta} non raggiungibile!\n{ex}");
+                    IsOpen = false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Metodo usato per controllare lo stato delle porte.
+        /// </summary>
+        public void Connect(int timeout) {
+            using (TcpClient TcpC = new()) {
+                try {
+                    if (TcpC.ConnectAsync(IPAddress, NumeroPorta).Wait(timeout)) {
+                        IsOpen = true;
+                    } else {
+                        IsOpen = false;
+                    }
+                } catch (SocketException ex) {
                     Debug.WriteLine($"Porta numero {NumeroPorta} non raggiungibile!\n{ex}");
                     IsOpen = false;
                 }

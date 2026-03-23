@@ -1,7 +1,8 @@
 # Development Log
 
 ## Introduzione
-Questo documento riporta il progresso dello sviluppo del progetto.
+Questo documento riporta il progresso dello sviluppo del progetto.  
+### Disclaimer
 La struttura del progetto è stata pensata per la maggiore scalabilità possibile, per questo potrebbe sembrare esagerata.
 
 ---
@@ -141,3 +142,22 @@ TCP_Socket:
 - Modificata della documentazione nella classe TCP_Socket.
 - Rimossa l'opzione per scorrere tra le opzioni di filtraggio ed ordinamento usando la rotellina mouse.
 - Modificata la larghezza base dell'applicazione.
+
+### [23/03/2026]
+**Attività svolte**
+- Aggiornamenti UI
+- Aggiornamenti backend
+- Modifiche della classe TCP_Socket
+
+UI:
+- Modificato il testo di spiegazione per il timeout e il suo valore di base.
+
+Backend:
+- Cambiato il metodo di connessione principale da TCP_Socket.Connect() a TCP_Socket.Connect(int timeout).
+
+TCP_Socket:
+- Aggiunte nuove porte nel dizionario dei servizi conosciuti.
+- !!!HUGE!!! Aggiunto metodo TCP_Socket.Connect(int timeout) per rendere il processo di connessione più veloce (https://stackoverflow.com/questions/17118632/how-to-set-the-timeout-for-a-tcpclient).
+
+**Aggiornamenti Documentazione**
+Andando avanti, si aggiungerà (dove è stato necessario) le fonti da dove si sono ottenute le informazioni.

@@ -9,14 +9,14 @@
         WindowStartupLocation="CenterScreen"
         Height="500" Width="1100" MinHeight="500" MinWidth="800"
         PreviewKeyDown="PortScanner_ShortCuts">
-	<Grid>
-		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="*"/>
-		</Grid.RowDefinitions>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-		<Menu Grid.Row="0">
-			<MenuItem Header="Opzioni">
+        <Menu Grid.Row="0">
+            <MenuItem Header="Opzioni">
                 <MenuItem Header="Scansione">
                     <MenuItem Header="Avvia Scansione" Click="Scan_AvviaScansione" InputGestureText="Ctrl + R"/>
                     <MenuItem Header="Ferma Scansione" Click="Scan_FermaScansione" InputGestureText="Ctrl + S"/>
@@ -27,15 +27,15 @@
                 </MenuItem>
                 <MenuItem Header="Esci" Click="Esci" InputGestureText="Ctrl + Q"/>
             </MenuItem>
-			<MenuItem Header="Visualizza">
-				<MenuItem Header="Temi">
-					<MenuItem Header="Tema Chiaro" Click="Tema_Chiaro" InputGestureText="Ctrl + L"/>
-					<MenuItem Header="Tema Scuro" Click="Tema_Scuro" InputGestureText="Ctrl + D"/>
+            <MenuItem Header="Visualizza">
+                <MenuItem Header="Temi">
+                    <MenuItem Header="Tema Chiaro" Click="Tema_Chiaro" InputGestureText="Ctrl + L"/>
+                    <MenuItem Header="Tema Scuro" Click="Tema_Scuro" InputGestureText="Ctrl + D"/>
                     <MenuItem Header="Tema di Sistema" Click="Tema_Sistema"/>
                 </MenuItem>
                 <MenuItem Header="Vecchio stile" Click="Tema_Vecchio"/>
             </MenuItem>
-			<MenuItem Header="Altro">
+            <MenuItem Header="Altro">
                 <MenuItem Header="FAQ">
                     <MenuItem Header="Cos'è un port scanner?" Click="FAQ_PortScanner"/>
                     <MenuItem Header="Che cos'è Sirius?" Click="FAQ_Sirius"/>
@@ -47,18 +47,18 @@
                     <MenuItem Header="L'azienda" Click="Crediti_Azienda" InputGestureText="Ctrl + Alt + A"/>
                 </MenuItem>
             </MenuItem>
-		</Menu>
+        </Menu>
 
-		<Grid Grid.Row="1" Margin="10">
-			<Grid>
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="350"/>
-					<ColumnDefinition Width="*"/>
-				</Grid.ColumnDefinitions>
+        <Grid Grid.Row="1" Margin="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="350"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
                 <ScrollViewer Grid.Column="0" Margin="0, 0, 5, 0"
 							  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    
+
                     <StackPanel Grid.Column="0" Margin="15" VerticalAlignment="Top">
                         <TextBlock Text="Parametri Scansione" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
 
@@ -72,8 +72,8 @@
                             <TextBox Name="txtPortMax" Width="90" Margin="5,0,0,0"/>
                         </StackPanel>
 
-                        <TextBlock Text="Timeout tra una connessione e l'altra (ms):"/>
-                        <TextBox Name="txtTimeout" Margin="0,5,0,10" Text="500"/>
+                        <TextBlock Text="Tempo per decretare lo stato di una porta (ms):"/>
+                        <TextBox Name="txtTimeout" Margin="0,5,0,10" Text="100"/>
 
                         <Button Name="btnAvviaScansione" Content="Avvia Scansione" Click="Scan_AvviaScansione" 
                                 HorizontalAlignment="Stretch" Height="30" Margin="0,10,0,0" Cursor="Hand"/>
@@ -118,14 +118,14 @@
                 </ScrollViewer>
 
                 <Grid Grid.Column="1" Margin="10,0,0,0">
-					<Grid.RowDefinitions>
-						<RowDefinition Height="*"/>
-						<RowDefinition Height="150"/>
-					</Grid.RowDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="150"/>
+                    </Grid.RowDefinitions>
 
                     <DataGrid Name="dtgScansioni" AutoGenerateColumns="False" IsReadOnly="True" Margin="0,0,0,10">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Stato (Immagine)" Width="*">
+                            <DataGridTemplateColumn Header="Stato (Icona)" Width="*">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Ellipse Width="20" Height="20" x:Name="ellipse"/>
@@ -141,10 +141,10 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTextColumn Header=" Stato" Binding="{Binding StatoPorta}" Width="*"/>
-							<DataGridTextColumn Header=" Numero della Porta" Binding="{Binding NumeroPorta}" Width="2*"/>
+                            <DataGridTextColumn Header=" Numero della Porta" Binding="{Binding NumeroPorta}" Width="2*"/>
                             <DataGridTextColumn Header=" Servizio Rilevato" Binding="{Binding Servizio}" Width="2*"/>
                         </DataGrid.Columns>
-					</DataGrid>
+                    </DataGrid>
 
                     <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,10,0,0">
                         <TextBlock Text="Statistiche Scansione" FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
@@ -152,11 +152,11 @@
                         <ProgressBar Name="prbProgressoScan" Height="10" IsIndeterminate="False"
                                      Minimum="0" Maximum="100" Margin="0, 0, 0, 10"/>
                         <TextBlock Name="txtDurata" Text="Durata: 0 ms"/>
-						<TextBlock Name="txtPorteAperte" Text="Porte Aperte: 0"/>
-						<TextBlock Name="txtTotalePorte" Text="Totale Porte Scansionate: 0"/>
-					</StackPanel>
-				</Grid>
-			</Grid>
-		</Grid>
-	</Grid>
+                        <TextBlock Name="txtPorteAperte" Text="Porte Aperte: 0"/>
+                        <TextBlock Name="txtTotalePorte" Text="Totale Porte Scansionate: 0"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
 </Window>

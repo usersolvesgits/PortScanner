@@ -1,7 +1,5 @@
 ﻿/*
  *  TODOS:
- *      -TCP_Socket:
- *          -Imparare i metodi async per aggiungerne uno
  *      -MainWindow.xaml.cs:
  *          -Esportazione_JSON()
  *          -Rifare il metodo di fermata della scansione
@@ -175,11 +173,10 @@ namespace PortScanner {
             for (int currentPortNum = rangePortMin; currentPortNum <= rangePortMax; currentPortNum++) {
                 TCP_Socket socket = new(target, currentPortNum);
                 try {
-                    socket.Connect();
+                    socket.Connect(timeoutScansione);
                     if (socket.IsOpen) {
                         porteAperte++;
                     }
-                    Thread.Sleep(timeoutScansione);
                     porteScansionate++;
                 } catch (Exception ex) {
                     Debug.WriteLine(ex);
@@ -214,8 +211,8 @@ namespace PortScanner {
                 double progresso = (double)porteScansionate / porteTotali * 100;
                 if (porteScansionate % intervalloAggiornamentoProgressBar == 0 ||
                     porteScansionate == porteTotali) {
-                    Dispatcher.Invoke(() => { 
-                        prbProgressoScan.Value = progresso; 
+                    Dispatcher.Invoke(() => {
+                        prbProgressoScan.Value = progresso;
                     });
                 }
             }
@@ -334,7 +331,7 @@ namespace PortScanner {
             //TODO -> migliorie fermata scansione
             richiestaFermataScansione = true;
         }
-        
+
         private void Esportazione_CSV(object sender, RoutedEventArgs e) {
             if (dtgScansioni.Items.Count == 0) {
                 MessageBox.Show("Attenzione: Nessun elemento da esportare trovato!",
