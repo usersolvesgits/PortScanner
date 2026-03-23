@@ -304,7 +304,16 @@ namespace PortScanner {
             }
             bool check = int.TryParse(timeoutString, out timeoutScansione);
             if (!check) {
-                MessageBox.Show("Attenzione: Inserire un timeout in millisecondi valido!",
+                MessageBox.Show("Attenzione: Inserire un timeout in millisecondi valido come numero intero!",
+                                "Attenzione",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                txtTimeout.Clear();
+                txtTimeout.Focus();
+                return;
+            }
+            if (timeoutScansione <= 0) {
+                MessageBox.Show("Attenzione: Inserire un valore maggiore di 0!",
                                 "Attenzione",
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Warning);

@@ -159,5 +159,8 @@ TCP_Socket:
 - Aggiunte nuove porte nel dizionario dei servizi conosciuti.
 - !!!HUGE!!! Aggiunto metodo TCP_Socket.Connect(int timeout) per rendere il processo di connessione più veloce (https://stackoverflow.com/questions/17118632/how-to-set-the-timeout-for-a-tcpclient).
 
+**Bug Fix**
+- Fixato bug dove se si impostava un tempo di timeout troppo piccolo (es: 0) si rischiava che le connessioni non registravano un output corretto.
+
 **Aggiornamenti Documentazione**
 Andando avanti, si aggiungerà (dove è stato necessario) le fonti da dove si sono ottenute le informazioni.
