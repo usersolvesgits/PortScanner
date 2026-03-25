@@ -16,6 +16,7 @@ using PortScanner.Core.Models;
 using System.Windows.Input;
 using SelectionChangedEventArgs = System.Windows.Controls.SelectionChangedEventArgs;
 using Util = PortScanner.Core.Utils.Util;
+using System.Net;
 
 
 namespace PortScanner {
@@ -23,6 +24,8 @@ namespace PortScanner {
         const string urlSviluppatore = "https://github.com/usersolvesgits";
         const string urlAzienda = "https://www.sirius.to.it/";
         const int intervalloAggiornamentoProgressBar = 2;
+        const int MinPort = IPEndPoint.MinPort;
+        const int MaxPort = IPEndPoint.MaxPort;
 
         enum OpzioniFiltri {
             Nessuno,
@@ -252,7 +255,20 @@ namespace PortScanner {
                 rangePortMin = int.Parse(txtPortMin.Text);
             } catch (Exception ex) {
                 Debug.WriteLine($"Errore nella conversione della porta minima: {ex}");
-                MessageBox.Show("Errore: Errore nel tentativo di conversione della porta minima, assicurarsi che il valore sia numerico!", "Errore", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Errore: Errore nel tentativo di conversione della porta minima, assicurarsi che il valore sia numerico!", 
+                                "Errore", 
+                                MessageBoxButton.OK, 
+                                MessageBoxImage.Error);
+                txtPortMin.Clear();
+                txtPortMin.Focus();
+                return;
+            }
+
+            if (rangePortMin < MinPort) {
+                MessageBox.Show($"Attenzione: Inserire un numero di porta maggiore o uguale a {MinPort}!", 
+                                "Attenzione", 
+                                MessageBoxButton.OK, 
+                                MessageBoxImage.Warning);
                 txtPortMin.Clear();
                 txtPortMin.Focus();
                 return;
@@ -280,11 +296,21 @@ namespace PortScanner {
                 return;
             }
 
+            if (rangePortMax > MaxPort) {
+                MessageBox.Show($"Attenzione: Inserire un numero di porta maggiore di {MaxPort}!",
+                                "Attenzione",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                txtPortMax.Clear();
+                txtPortMax.Focus();
+                return;
+            }
+
             if (rangePortMin > rangePortMax) {
                 MessageBox.Show("Errore: Inserisci un intervallo di porte valido: porta minima a sinistra e porta massima a destra (es. 1000 – 2000).",
                                 "Errore",
                                 MessageBoxButton.OK,
-                                MessageBoxImage.Warning);
+                                MessageBoxImage.Error);
                 txtPortMin.Clear();
                 txtPortMax.Clear();
                 txtPortMin.Focus();

@@ -164,3 +164,7 @@ TCP_Socket:
 
 **Aggiornamenti Documentazione**
 Andando avanti, si aggiungerà (dove è stato necessario) le fonti da dove si sono ottenute le informazioni.
+
+### [25/03/2026]
+**Minor Fixes**
+- Aggiunti controlli sull'inserimento del range delle porte.
