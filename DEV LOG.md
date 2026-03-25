@@ -166,5 +166,9 @@ TCP_Socket:
 Andando avanti, si aggiungerà (dove è stato necessario) le fonti da dove si sono ottenute le informazioni.
 
 ### [25/03/2026]
+**Problemi riscontrati**
+- ImpossibilitA di scansionare le porte 0 e 137.
+- Il numero di porte aperte non viene visualizzato sull'interfaccia utente correttamente.
+
 **Minor Fixes**
 - Aggiunti controlli sull'inserimento del range delle porte.
