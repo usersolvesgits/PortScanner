@@ -167,7 +167,7 @@ Andando avanti, si aggiungerà (dove è stato necessario) le fonti da dove si so
 
 ### [25/03/2026]
 **Problemi riscontrati**
-- ImpossibilitA di scansionare le porte 0 e 137.
+- Impossibilità di scansionare le porte 0 e 137.
 - Il numero di porte aperte non viene visualizzato sull'interfaccia utente correttamente.
 
 **Minor Fixes**
