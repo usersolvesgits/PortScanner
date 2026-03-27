@@ -160,15 +160,39 @@ TCP_Socket:
 - !!!HUGE!!! Aggiunto metodo TCP_Socket.Connect(int timeout) per rendere il processo di connessione più veloce (https://stackoverflow.com/questions/17118632/how-to-set-the-timeout-for-a-tcpclient).
 
 **Bug Fix**
-- Fixato bug dove se si impostava un tempo di timeout troppo piccolo (es: 0) si rischiava che le connessioni non registravano un output corretto.
+- Fixato bug dove se si impostava un tempo di timeout troppo piccolo (es: 0) si rischiava che le connessioni non registravano un output corretto nell'interfaccia grafica.
 
 **Aggiornamenti Documentazione**
 Andando avanti, si aggiungerà (dove è stato necessario) le fonti da dove si sono ottenute le informazioni.
 
 ### [25/03/2026]
 **Problemi riscontrati**
-- Impossibilità di scansionare le porte 0 e 137.
-- Il numero di porte aperte non viene visualizzato sull'interfaccia utente correttamente.
+- 1) Impossibilità di scansionare le porte 0 e 137.
+- 2) Il numero di porte aperte non viene visualizzato sull'interfaccia utente correttamente.
 
 **Minor Fixes**
 - Aggiunti controlli sull'inserimento del range delle porte.
+
+### [27/03/2026]
+**Attività svolte**
+- Aggiornamenti UI
+- Aggiornamenti backend
+- Modifiche della classe TCP_Socket
+- Modifiche struttura del progetto
+
+UI:
+- Modificata l'icona dell'applicazione.
+
+Backend:
+- Apportate migliorie nella logica del calcolo delle statistiche della scansione.
+- Quando si prova a fermare la scansione uscendo dall'applicazione mentre è ancora in uso, viene mandata una richiesta per fermare la scansione.
+
+TCP_Socket:
+- Aggiunte nuovi variabili costanti per il numero di porta minima e massima.
+- Spostato il metodo "CheckValidPort(string port)" da Util a TCP_Socket.
+
+Struttura del progetto:
+- Rimossa la directory e classe "Util" e spostati i suoi contenuti nel MainWindow.xaml.cs e nella classe TCP_Socket.
+
+**Bug Fix**
+- Risolto bug n°2 del giorno *25/03/2026*

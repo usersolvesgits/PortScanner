@@ -2,11 +2,15 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
+using System.Windows;
 
 namespace PortScanner.Core.Models {
     public class TCP_Socket {
         private int _numPorta;
         private bool _statoPorta;
+
+        public const int PrimaPorta = 0;
+        public const int UltimaPorta = 65535;
 
         /// <summary>
         /// Dizionario dove il numero della porta corrisponde ad un servizio noto.
@@ -146,6 +150,41 @@ namespace PortScanner.Core.Models {
                    $"Numero della porta: {NumeroPorta};\t" +
                    $"Stato della porta: {StatoPorta};\t" +
                    $"Servizio: {Servizio}.";
+        }
+
+        /// <summary>
+        /// Verifica se la stringa fornita rappresenta una porta valida.
+        /// La porta deve essere un numero compreso tra <see cref="IPEndPoint.MinPort"/> e <see cref="IPEndPoint.MaxPort"/>.
+        /// </summary>
+        /// <param name="port">
+        /// Stringa che rappresenta il numero di porta da controllare.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> se la porta è numerica e rientra nell'intervallo valido delle porte TCP/UDP;
+        /// <c>false</c> se la stringa è vuota, non numerica o fuori dall'intervallo consentito.
+        /// </returns>
+        public static bool CheckValidPort(string port) {
+            if (string.IsNullOrWhiteSpace(port)) {
+                return false;
+            }
+
+            int portInt;
+            try {
+                portInt = int.Parse(port);
+            } catch (Exception ex) {
+                Debug.WriteLine(ex);
+                MessageBox.Show("Attenzione: Assicurarsi che il valore inserito sia numerico!",
+                                "Attenzione",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                return false;
+            }
+
+            if (portInt < PrimaPorta || portInt > UltimaPorta) {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>

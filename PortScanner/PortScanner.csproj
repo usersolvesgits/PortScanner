@@ -9,10 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\Icons\lente_ingrandimento.ico" />
+    <None Remove="Assets\Icons\lente_ingrandimento.png" />
     <None Remove="Assets\Icons\windmill.ico" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Assets\Icons\lente_ingrandimento.ico" />
     <Resource Include="Assets\Icons\windmill.ico" />
   </ItemGroup>
 
