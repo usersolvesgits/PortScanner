@@ -195,4 +195,31 @@ Struttura del progetto:
 - Rimossa la directory e classe "Util" e spostati i suoi contenuti nel MainWindow.xaml.cs e nella classe TCP_Socket.
 
 **Bug Fix**
-- Risolto bug n°2 del giorno *25/03/2026*
+- Risolto bug n°2 del giorno *25/03/2026*.
+
+### [28/03/2026]
+**Attività svolte**
+- Aggiornamenti UI
+- Aggiornamenti backend
+- Modifiche della classe TCP_Socket
+
+UI:
+- Modificata la datagrid per funzionare senza il binding della proprietà "StatoPorta" della classe TCP_Socket.
+- Modificato la casella di testo per scrivere il separatore del salvataggio in CSV.
+
+Backend:
+- Modificata la logica di controllo per l'inserimento del range delle porte.
+- Migliorie per la fermata della scansione.
+- Spostato il reset delle statistiche di scansione all'avvio di essa per evitare disguidi sull'interfaccia utente.
+- Modificato il metodo principale di conversione in formato CSV per consentire l'uso di una stringa al posto di un singolo carattere come separatore.
+
+TCP_Socket:
+- Rimossa la proprietà "StatoPorta".
+- Modificato il metodo Connect(int timeout) per evitare interruzzioni anomale durante la scansione.
+- Modificata la costante che indica la prima porta disponibile per effettuare la scansione.
+- Aggiornati i metodi di conversione in formato CSV.
+- Aggiunti nuovi overload per i metodi ToCSV per permettere l'utilizzo di una stringa come separatore.
+- Aggiornata ed aggiunta della documentazione dei metodi.
+
+**Bug Fix**
+- Risolto bug n°2 del giorno *25/03/2026*.

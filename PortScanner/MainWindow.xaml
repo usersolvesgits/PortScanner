@@ -109,7 +109,7 @@
                             <TextBlock Text="Separatore:" VerticalAlignment="Center" Margin="10,0,5,0"/>
 
                             <TextBox Name="txtSeparatoreCSV" Text=";"
-                                     Width="60" Height="30" 
+                                     Margin="10, 0, 0, 0" Height="30" Width="100"
                                      VerticalContentAlignment="Center"/>
                         </StackPanel>
                         <Button Name="btnEsportaJSON" Content="Esporta JSON" Click="Esportazione_JSON" 
@@ -140,7 +140,18 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header=" Stato" Binding="{Binding StatoPorta}" Width="*"/>
+                            <DataGridTemplateColumn Header="Stato" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="Chiusa"/>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsOpen}" Value="True">
+                                                <Setter Property="TextBlock.Text" Value="Aperta"/>
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridTextColumn Header=" Numero della Porta" Binding="{Binding NumeroPorta}" Width="2*"/>
                             <DataGridTextColumn Header=" Servizio Rilevato" Binding="{Binding Servizio}" Width="2*"/>
                         </DataGrid.Columns>

@@ -175,13 +175,6 @@ namespace PortScanner {
         private void Scan_Scansione() {
             porteTotali = rangePortMax - rangePortMin + 1;
 
-            Dispatcher.Invoke(() => {
-                prbProgressoScan.Value = 0;
-                txtDurata.Text = txtDurata.Text.Replace(durataScansione_l.ToString(), "0");
-                txtPorteAperte.Text = txtPorteAperte.Text.Replace(porteAperte.ToString(), "0");
-                txtPorteScansionate.Text = txtPorteScansionate.Text.Replace(porteScansionate.ToString(), "0");
-            });
-
             porteScansionate = 0;
             porteAperte = 0;
             int porteApertePrecedente = 0;
@@ -263,6 +256,13 @@ namespace PortScanner {
         private void Scan_AvviaScansione(object sender, RoutedEventArgs e) {
             listaSockets.Clear();
 
+            Dispatcher.Invoke(() => {
+                prbProgressoScan.Value = 0;
+                txtDurata.Text = txtDurata.Text.Replace(durataScansione_l.ToString(), "0");
+                txtPorteAperte.Text = txtPorteAperte.Text.Replace(porteAperte.ToString(), "0");
+                txtPorteScansionate.Text = txtPorteScansionate.Text.Replace(porteScansionate.ToString(), "0");
+            });
+
             //////HOSTNAME / IP-ADDRESS//////
             if (string.IsNullOrWhiteSpace(txtIPAddress.Text)) {
                 MessageBox.Show("Attenzione: Inserire un hostname o indirizzo IP valido!",
@@ -277,28 +277,6 @@ namespace PortScanner {
 
             //////PORTE//////
             if (!TCP_Socket.CheckValidPort(txtPortMin.Text)) {
-                MessageBox.Show("Attenzione: Inserire un numero di porta valido!",
-                                "Attenzione",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Warning);
-                txtPortMin.Clear();
-                txtPortMin.Focus();
-                return;
-            }
-            try {
-                rangePortMin = int.Parse(txtPortMin.Text);
-            } catch (Exception ex) {
-                Debug.WriteLine($"Errore nella conversione della porta minima: {ex}");
-                MessageBox.Show("Errore: Errore nel tentativo di conversione della porta minima, assicurarsi che il valore sia numerico!",
-                                "Errore",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Error);
-                txtPortMin.Clear();
-                txtPortMin.Focus();
-                return;
-            }
-
-            if (rangePortMin < TCP_Socket.PrimaPorta) {
                 MessageBox.Show($"Attenzione: Inserire un numero di porta maggiore o uguale a {TCP_Socket.PrimaPorta}!",
                                 "Attenzione",
                                 MessageBoxButton.OK,
@@ -307,9 +285,10 @@ namespace PortScanner {
                 txtPortMin.Focus();
                 return;
             }
+            rangePortMin = int.Parse(txtPortMin.Text);
 
             if (!TCP_Socket.CheckValidPort(txtPortMax.Text)) {
-                MessageBox.Show("Attenzione: Inserire un numero di porta valido!",
+                MessageBox.Show($"Attenzione: Inserire un numero di porta minore o uguale a {TCP_Socket.UltimaPorta}!",
                                 "Attenzione",
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Warning);
@@ -317,28 +296,7 @@ namespace PortScanner {
                 txtPortMax.Focus();
                 return;
             }
-            try {
-                rangePortMax = int.Parse(txtPortMax.Text);
-            } catch (Exception ex) {
-                Debug.WriteLine($"Errore nella conversione della porta massima: {ex}");
-                MessageBox.Show("Errore: Errore nel tentativo di conversione della porta massima, assicurarsi che il valore sia numerico!",
-                                "Errore",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Error);
-                txtPortMax.Clear();
-                txtPortMax.Focus();
-                return;
-            }
-
-            if (rangePortMax > TCP_Socket.UltimaPorta) {
-                MessageBox.Show($"Attenzione: Inserire un numero di porta maggiore di {TCP_Socket.UltimaPorta}!",
-                                "Attenzione",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Warning);
-                txtPortMax.Clear();
-                txtPortMax.Focus();
-                return;
-            }
+            rangePortMax = int.Parse(txtPortMax.Text);
 
             if (rangePortMin > rangePortMax) {
                 MessageBox.Show("Errore: Inserisci un intervallo di porte valido: porta minima a sinistra e porta massima a destra (es. 1000 – 2000).",
@@ -398,7 +356,9 @@ namespace PortScanner {
         }
         private void Scan_FermaScansione(object sender, RoutedEventArgs e) {
             //TODO -> migliorie fermata scansione
-            richiestaFermataScansione = true;
+            if (scansioneAttiva) {
+                richiestaFermataScansione = true;
+            }
         }
 
         private void Esportazione_CSV(object sender, RoutedEventArgs e) {
@@ -418,17 +378,9 @@ namespace PortScanner {
                 return;
             }
 
-            if (txtSeparatoreCSV.Text.Length > 1) {
-                MessageBox.Show("Attenzione: Il separatore per la formattazione CSV deve essere un singolo carattere!",
-                                "Attenzione",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Warning);
-                return;
-            }
-
-            char separatoreCSV;
+            string separatoreCSV;
             try {
-                separatoreCSV = char.Parse(txtSeparatoreCSV.Text);
+                separatoreCSV = txtSeparatoreCSV.Text;
             } catch (Exception ex) {
                 Debug.WriteLine(ex);
                 MessageBox.Show("Errore: Errore durante la conversione del carattere separatore per la formattazione CSV!",
@@ -445,7 +397,7 @@ namespace PortScanner {
                 AddExtension = true
             };
 
-            string filePath = String.Empty;
+            string filePath = string.Empty;
             if (dlg.ShowDialog() == true) {
                 filePath = dlg.FileName;
             }
@@ -459,6 +411,7 @@ namespace PortScanner {
                     for (int i = 0; i < dtgScansioni.Items.Count; i++) {
                         var socket = dtgScansioni.Items[i] as TCP_Socket;
                         if (i == 0) {
+                            writer.WriteLine($"Scansione salvata il [{DateOnly.FromDateTime(DateTime.Now)}]");
                             writer.WriteLine($"Target: {socket.IPAddress?.ToString()}");
                             writer.WriteLine($"Stato della porta{separatoreCSV}Numero della porta{separatoreCSV}Servizio rilevato");
                         }

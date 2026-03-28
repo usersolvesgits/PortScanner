@@ -7,10 +7,17 @@ using System.Windows;
 namespace PortScanner.Core.Models {
     public class TCP_Socket {
         private int _numPorta;
-        private bool _statoPorta;
 
-        public const int PrimaPorta = 0;
+
+        /// <summary>
+        /// Specifica la prima porta da dove è possibile iniziare una scansione
+        /// </summary>
+        public const int PrimaPorta = 1;
+        /// <summary>
+        /// Specifica l'ultima porta da dove è possibile iniziare una scansione
+        /// </summary>
         public const int UltimaPorta = 65535;
+
 
         /// <summary>
         /// Dizionario dove il numero della porta corrisponde ad un servizio noto.
@@ -104,35 +111,28 @@ namespace PortScanner.Core.Models {
         }
 
         /// <summary>
-        /// Indica lo stato di connessione della porta.
-        /// Se la stringa è "Aperta", allora la porta è aperta.
-        /// Se la stringa è "Chiusa", allora la porta è chiusa o c'è un problema nella connessione verso tale porta.
-        /// </summary>
-        public string StatoPorta { get; private set; }
-
-        /// <summary>
         /// Indica lo stato di connessione di una porta come valore booleano.
         /// Se impostato su <see langword="true"/> la porta è aperta.
         /// Se impostato su <see langword="false"/> la porta è chiusa.
         /// </summary>
-        public bool IsOpen {
-            get { return _statoPorta; }
-            private set {
-                if (value) {
-                    _statoPorta = true;
-                    StatoPorta = "Aperta";
-                } else {
-                    _statoPorta = false;
-                    StatoPorta = "Chiusa";
-                }
-            }
-        }
+        public bool IsOpen { get; private set; }
 
         /// <summary>
         /// Indica che tipo di servizio viene usato in quale porta.
         /// </summary>
         public string Servizio { get; private set; }
 
+
+
+        /// <summary>
+        /// Costruttore della classe <see cref="TCP_Socket"/>.
+        /// </summary>
+        /// <param name="Hostname">
+        /// Stringa rappresentante l'hostname.
+        /// </param>
+        /// <param name="NumeroPorta">
+        /// Indica il numero della porta della socket.
+        /// </param>
         public TCP_Socket(string Hostname, int NumeroPorta) {
             this.Hostname = Hostname;
             IPAddress[] addresses = Dns.GetHostAddresses(Hostname);
@@ -140,17 +140,29 @@ namespace PortScanner.Core.Models {
             this.NumeroPorta = NumeroPorta;
         }
 
+        /// <summary>
+        /// Costruttore della classe <see cref="TCP_Socket"/>.
+        /// </summary>
+        /// <param name="IPAddress">
+        /// <see cref="System.Net.IPAddress"/> del destinatario.
+        /// </param>
+        /// <param name="NumeroPorta">
+        /// Indica il numero della porta della socket.
+        /// </param>
         public TCP_Socket(IPAddress IPAddress, int NumeroPorta) {
             this.IPAddress = IPAddress;
             this.NumeroPorta = NumeroPorta;
         }
 
+
         public override string ToString() {
+            string stato = IsOpen ? "Aperta" : "Chiusa";
             return $"Indirizzo IP destinatario: {IPAddress?.ToString() ?? Hostname};\t" +
                    $"Numero della porta: {NumeroPorta};\t" +
-                   $"Stato della porta: {StatoPorta};\t" +
+                   $"Stato della porta: {stato};\t" +
                    $"Servizio: {Servizio}.";
         }
+
 
         /// <summary>
         /// Verifica se la stringa fornita rappresenta una porta valida.
@@ -198,7 +210,23 @@ namespace PortScanner.Core.Models {
         /// <c><see cref="IsOpen"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>.
         /// </returns>
         public static string ToCSV(TCP_Socket socket, char separatore) {
-            return $"{socket.StatoPorta}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
+            string StatoPorta = socket.IsOpen ? "Aperta" : "Chiusa";
+            return $"{StatoPorta}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
+        }
+
+        /// <summary>
+        /// Restituisce la rappresentazione della porta in formato CSV.
+        /// </summary>
+        /// <param name="separatore">
+        /// Stringa utilizzata come separatore tra i campi del file.
+        /// </param>
+        /// <returns>
+        /// Una stringa che rappresenta lo stato della porta nel formato:
+        /// <c><see cref="IsOpen"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>.
+        /// </returns>
+        public static string ToCSV(TCP_Socket socket, string separatore) {
+            string StatoPorta = socket.IsOpen ? "Aperta" : "Chiusa";
+            return $"{StatoPorta}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
         }
 
         /// <summary>
@@ -220,10 +248,37 @@ namespace PortScanner.Core.Models {
         /// se <paramref name="ShowIPAddress"/> è <see langword="true"/>.
         /// </returns>
         public static string ToCSV(TCP_Socket socket, char separatore, bool ShowIPAddress) {
+            string StatoPorta = socket.IsOpen ? "Aperta" : "Chiusa";
             if (ShowIPAddress) {
-                return $"{socket.IPAddress?.ToString()}{separatore}{socket.StatoPorta}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
+                return $"{socket.IPAddress?.ToString()}{separatore}{StatoPorta}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
             }
-            return $"{socket.StatoPorta}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
+            return $"{StatoPorta}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
+        }
+
+        /// <summary>
+        /// Restituisce la rappresentazione della porta in formato CSV 
+        /// con la possibilità di includere anche l'indirizzo IP.
+        /// </summary>
+        /// <param name="ShowIPAddress">
+        /// Se <see langword="true"/>, la stringa risultante includerà anche 
+        /// l'indirizzo IP del destinatario come primo campo.
+        /// </param>
+        /// <param name="separatore">
+        /// Stringa utilizzata come separatore tra i campi del file.
+        /// </param>
+        /// <returns>
+        /// Una stringa che rappresenta lo stato della porta nel formato:
+        /// <c><see cref="IsOpen"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>
+        /// oppure
+        /// <c><see cref="IPAddress">,<see cref="IsOpen"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>
+        /// se <paramref name="ShowIPAddress"/> è <see langword="true"/>.
+        /// </returns>
+        public static string ToCSV(TCP_Socket socket, string separatore, bool ShowIPAddress) {
+            string StatoPorta = socket.IsOpen ? "Aperta" : "Chiusa";
+            if (ShowIPAddress) {
+                return $"{socket.IPAddress?.ToString()}{separatore}{StatoPorta}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
+            }
+            return $"{StatoPorta}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
         }
 
         /// <summary>
@@ -253,6 +308,9 @@ namespace PortScanner.Core.Models {
         /// <summary>
         /// Metodo usato per controllare lo stato delle porte.
         /// </summary>
+        /// <param name="timeout">
+        /// Numero di millisecondi per decretare se una porta è aperta o meno.
+        /// </param>
         public void Connect(int timeout) {
             using (TcpClient TcpC = new()) {
                 try {
@@ -262,7 +320,12 @@ namespace PortScanner.Core.Models {
                         IsOpen = false;
                     }
                 } catch (SocketException ex) {
-                    Debug.WriteLine($"Porta numero {NumeroPorta} non raggiungibile!\n{ex}");
+                    Debug.WriteLine(ex);
+                    IsOpen = false;
+                } catch (AggregateException ex) {
+                    foreach (var innerExceptions in ex.InnerExceptions) { 
+                        Debug.WriteLine(ex); 
+                    }
                     IsOpen = false;
                 }
             }
