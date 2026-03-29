@@ -18,7 +18,6 @@ La struttura del progetto è stata pensata per la maggiore scalabilità possibil
 ## Log di sviluppo
 
 ### [06/03/2026]
-
 **Attività svolte**
 - Creazione menù dell'interfaccia grafica
 - Primi controlli
@@ -28,8 +27,9 @@ La struttura del progetto è stata pensata per la maggiore scalabilità possibil
 - Opzioni per cambiare il tema dell'applicazione (Chiaro, Scuro e Tema di Sistema).
 - Aggiunti crediti sviluppatore ed azienda.
 
-### [07/03/2026]
+---
 
+### [07/03/2026]
 **Attività svolte**
 - Creazione UI
 - Modifiche della classe TCP_Socket
@@ -41,8 +41,9 @@ La struttura del progetto è stata pensata per la maggiore scalabilità possibil
 **Bug Fix**
 - Risolto bug che permetteva l'inserimento dall'esterno della proprietà "Servizio" nella classe TCP_Socket.
 
-### [10/03/2026]
+---
 
+### [10/03/2026]
 **Attività svolte**
 - Aggiornamenti UI
 - Modifiche della classe TCP_Socket
@@ -58,8 +59,9 @@ Backend:
 - Aggiunto loop di scansione di base.
 - Modificato il metodo OnClosing() per attivare il messaggio di avvertimento solo quando una scansione non ha finito.
 
-### [12/03/2026]
+---
 
+### [12/03/2026]
 **Attività svolte**
 - Aggiornamenti UI
 - Aggiornamenti backend
@@ -74,8 +76,9 @@ Backend:
 - Aggiunta funzionalità per salvare lo scan in formato CSV.
 - Aggiunte schermate per la sezione FAQ.
 
-### [16/03/2026]
+---
 
+### [16/03/2026]
 **Attività svolte**
 - Bug fixing
 - Aggiornamenti UI
@@ -92,8 +95,9 @@ Backend:
   aggiunto un thread apposito per la scansione.
 - Aggiunte documentazioni per metodi.
 
-### [18/03/2026]
+---
 
+### [18/03/2026]
 **Attività svolte**
 - Aggiornamenti UI
 - Aggiornamenti backend
@@ -107,8 +111,9 @@ Backend:
 - Aggiunta opzione per selezionare un timeout tra una scansione ed un'altra.
 - Aggiunta logica per aggiornare la ProgressBar durante la scansione.
 
-### [22/03/2026]
+---
 
+### [22/03/2026]
 **Attività svolte**
 - Aggiornamenti UI
 - Aggiornamenti backend
@@ -143,6 +148,8 @@ TCP_Socket:
 - Rimossa l'opzione per scorrere tra le opzioni di filtraggio ed ordinamento usando la rotellina mouse.
 - Modificata la larghezza base dell'applicazione.
 
+---
+
 ### [23/03/2026]
 **Attività svolte**
 - Aggiornamenti UI
@@ -165,6 +172,8 @@ TCP_Socket:
 **Aggiornamenti Documentazione**
 Andando avanti, si aggiungerà (dove è stato necessario) le fonti da dove si sono ottenute le informazioni.
 
+---
+
 ### [25/03/2026]
 **Problemi riscontrati**
 - 1) Impossibilità di scansionare le porte 0 e 137.
@@ -172,6 +181,8 @@ Andando avanti, si aggiungerà (dove è stato necessario) le fonti da dove si so
 
 **Minor Fixes**
 - Aggiunti controlli sull'inserimento del range delle porte.
+
+---
 
 ### [27/03/2026]
 **Attività svolte**
@@ -196,6 +207,8 @@ Struttura del progetto:
 
 **Bug Fix**
 - Risolto bug n°2 del giorno *25/03/2026*.
+
+---
 
 ### [28/03/2026]
 **Attività svolte**
@@ -222,4 +235,35 @@ TCP_Socket:
 - Aggiornata ed aggiunta della documentazione dei metodi.
 
 **Bug Fix**
-- Risolto bug n°2 del giorno *25/03/2026*.
+- Risolto bug n°1 del giorno *25/03/2026*.
+
+---
+
+### [29/03/2026]
+**Attività svolte**
+- Aggiornamenti UI
+- Aggiornamenti backend
+- Modifiche della classe TCP_Socket
+- Modifiche DEV LOG.md
+
+UI:
+- Rimosse le shortcuts dalla sezione dei crediti.
+- Aggiunta shortcut per cambiare il tema dell'applicazione nel tema di sistema.
+- Aggiunte nuove opzioni di filtraggio.
+- Modificato il testo delle opzioni di ordinamento per includere le porte filtrate.
+
+Backend:
+- Aggiunte statistiche nell'esportazione della scansione in formato CSV.
+- Aggiunta nuova opzione di filtraggio.
+- Modificata la logica di filtraggio ed ordinamento per usare la proprietà "Stato" della classe TCP_Socket.
+
+TCP_Socket:
+- Rimossa proprietà booleana "IsOpen" e sostituita con un enum "Stato".
+- Modificata documentazione.
+- Modificati i metodi Connect() per decretare se una porta è aperta, filtrata o chiusa.
+
+DEV LOG:
+- Aggiunti separatori per i vari giorni.
+
+**Problemi riscontrati**
+- 1) Se si prova ad effettuare una scansione e si imposta un timeout inferiore ai ~3000ms, le porte "Filtrate" sono dei falsi.

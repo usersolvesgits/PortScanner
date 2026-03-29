@@ -29,9 +29,9 @@
             </MenuItem>
             <MenuItem Header="Visualizza">
                 <MenuItem Header="Temi">
-                    <MenuItem Header="Tema Chiaro" Click="Tema_Chiaro" InputGestureText="Ctrl + L"/>
-                    <MenuItem Header="Tema Scuro" Click="Tema_Scuro" InputGestureText="Ctrl + D"/>
-                    <MenuItem Header="Tema di Sistema" Click="Tema_Sistema"/>
+                    <MenuItem Header="Tema Chiaro" Click="Tema_Chiaro" InputGestureText="Ctrl + Alt + L"/>
+                    <MenuItem Header="Tema Scuro" Click="Tema_Scuro" InputGestureText="Ctrl + Alt + D"/>
+                    <MenuItem Header="Tema di Sistema" Click="Tema_Sistema" InputGestureText="Ctrl + Alt + S"/>
                 </MenuItem>
                 <MenuItem Header="Vecchio stile" Click="Tema_Vecchio"/>
             </MenuItem>
@@ -43,8 +43,8 @@
                     <MenuItem Header="È legale usare un port scanner?" Click="FAQ_Legale"/>
                 </MenuItem>
                 <MenuItem Header="Crediti">
-                    <MenuItem Header="Lo sviluppatore" Click="Crediti_Sviluppatore" InputGestureText="Ctrl + Alt + S"/>
-                    <MenuItem Header="L'azienda" Click="Crediti_Azienda" InputGestureText="Ctrl + Alt + A"/>
+                    <MenuItem Header="Lo sviluppatore" Click="Crediti_Sviluppatore"/>
+                    <MenuItem Header="L'azienda" Click="Crediti_Azienda"/>
                 </MenuItem>
             </MenuItem>
         </Menu>
@@ -89,14 +89,15 @@
                             <ComboBoxItem Content="Nessun Filtro" IsSelected="True"/>
                             <ComboBoxItem Content="Porte Aperte"/>
                             <ComboBoxItem Content="Porte Chiuse"/>
+                            <ComboBoxItem Content="Porte Filtrate"/>
                             <ComboBoxItem Content="Servizi Rilevati"/>
                         </ComboBox>
                         <TextBlock Text="Ordina per:"/>
                         <ComboBox Name="cmbOrdina" Margin="0,0,0,5" 
                                   SelectionChanged="OpzioniScansione_CambioOrdinamento" PreviewMouseWheel="OpzioniScansione_MouseWheel">
                             <ComboBoxItem Content="Nessun Ordinamento" IsSelected="True"/>
-                            <ComboBoxItem Content="Stato Porta (Aperte - Chiuse)"/>
-                            <ComboBoxItem Content="Stato Porta (Chiuse - Aperte)"/>
+                            <ComboBoxItem Content="Stato Porta (Aperte - Filtrate - Chiuse)"/>
+                            <ComboBoxItem Content="Stato Porta (Chiuse - Filtrate - Aperte)"/>
                         </ComboBox>
 
                         <Separator Margin="0,10,0,10"/>
@@ -130,25 +131,23 @@
                                     <DataTemplate>
                                         <Ellipse Width="20" Height="20" x:Name="ellipse"/>
                                         <DataTemplate.Triggers>
-                                            <DataTrigger Binding="{Binding IsOpen}" Value="True">
+                                            <DataTrigger Binding="{Binding Stato}" Value="Aperta">
                                                 <Setter TargetName="ellipse" Property="Fill" Value="Green"/>
                                             </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsOpen}" Value="False">
+                                            <DataTrigger Binding="{Binding Stato}" Value="Chiusa">
                                                 <Setter TargetName="ellipse" Property="Fill" Value="Red"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Stato}" Value="Filtrata">
+                                                <Setter TargetName="ellipse" Property="Fill" Value="Blue"/>
                                             </DataTrigger>
                                         </DataTemplate.Triggers>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Stato" Width="*">
+                            <DataGridTemplateColumn Header="Stato (Icona)" Width="*">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="Chiusa"/>
-                                        <DataTemplate.Triggers>
-                                            <DataTrigger Binding="{Binding IsOpen}" Value="True">
-                                                <Setter Property="TextBlock.Text" Value="Aperta"/>
-                                            </DataTrigger>
-                                        </DataTemplate.Triggers>
+                                        <TextBlock Text="{Binding Stato}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>

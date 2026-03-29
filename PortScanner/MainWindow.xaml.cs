@@ -27,15 +27,17 @@ namespace PortScanner {
             Nessuno,
             PorteAperte,
             PorteChiuse,
+            PorteFiltrate,
             ServiziRilevati
         }
         enum OpzioniOrdinamenti {
             Nessuno,
-            PorteAperteChiuse,
-            PorteChiuseAperte
+            AperteFiltrateChiuse,
+            ChiuseFiltrateAperte
         }
 
         ObservableCollection<TCP_Socket> listaSockets = new();
+        DateTime dataScansione;
         string target = string.Empty;
         int rangePortMin,
             rangePortMax;
@@ -105,6 +107,10 @@ namespace PortScanner {
                         Scan_FermaScansione(null, null);
                         e.Handled = true;
                         break;
+                }
+            }
+            if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Alt)) {
+                switch (e.Key) {
                     case Key.L:
                         Tema_Chiaro(null, null);
                         e.Handled = true;
@@ -113,16 +119,8 @@ namespace PortScanner {
                         Tema_Scuro(null, null);
                         e.Handled = true;
                         break;
-                }
-            }
-            if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Alt)) {
-                switch (e.Key) {
-                    case Key.A:
-                        Crediti_Azienda(null, null);
-                        e.Handled = true;
-                        break;
                     case Key.S:
-                        Crediti_Sviluppatore(null, null);
+                        Tema_Sistema(null, null);
                         e.Handled = true;
                         break;
                     case Key.C:
@@ -183,6 +181,7 @@ namespace PortScanner {
             Stopwatch durataScansione = new();
             durataScansione.Start();
 
+            dataScansione = DateTime.Now;
             for (int currentPortNum = rangePortMin; currentPortNum <= rangePortMax; currentPortNum++) {
                 TCP_Socket socket = new(target, currentPortNum);
                 try {
@@ -197,10 +196,11 @@ namespace PortScanner {
                     }
 
                     socket.Connect(timeoutScansione);
-                    if (socket.IsOpen) {
+                    if (socket.Stato == TCP_Socket.StatoPorta.Aperta) {
                         porteAperte++;
                     }
                 } catch (Exception ex) {
+                    Debug.WriteLine(ex.Message);
                     Debug.WriteLine(ex);
                     durataScansione.Stop();
                     durataScansione_l = durataScansione.ElapsedMilliseconds;
@@ -240,7 +240,7 @@ namespace PortScanner {
                     }
                 });
 
-                if (socket.IsOpen) {
+                if (socket.Stato == TCP_Socket.StatoPorta.Aperta) {
                     porteApertePrecedente++;
                 }
             }
@@ -407,16 +407,16 @@ namespace PortScanner {
             }
 
             try {
-                using (StreamWriter writer = new StreamWriter(filePath)) {
-                    for (int i = 0; i < dtgScansioni.Items.Count; i++) {
-                        var socket = dtgScansioni.Items[i] as TCP_Socket;
-                        if (i == 0) {
-                            writer.WriteLine($"Scansione salvata il [{DateOnly.FromDateTime(DateTime.Now)}]");
-                            writer.WriteLine($"Target: {socket.IPAddress?.ToString()}");
-                            writer.WriteLine($"Stato della porta{separatoreCSV}Numero della porta{separatoreCSV}Servizio rilevato");
-                        }
-                        writer.WriteLine(TCP_Socket.ToCSV(socket, separatoreCSV));
+                using StreamWriter writer = new(filePath);
+                for (int i = 0; i < dtgScansioni.Items.Count; i++) {
+                    var socket = dtgScansioni.Items[i] as TCP_Socket;
+                    if (i == 0) {
+                        writer.WriteLine($"Scansione avviata: [{dataScansione}]");
+                        writer.WriteLine($"Durata della scansione: [{durataScansione_l}]ms");
+                        writer.WriteLine($"Target: {socket.IPAddress?.ToString()}");
+                        writer.WriteLine($"Stato della porta{separatoreCSV}Numero della porta{separatoreCSV}Servizio rilevato");
                     }
+                    writer.WriteLine(TCP_Socket.ToCSV(socket, separatoreCSV));
                 }
             } catch (Exception ex) {
                 Debug.WriteLine(ex);
@@ -444,7 +444,7 @@ namespace PortScanner {
                     dtgScansioni.ItemsSource = listaSockets;
                     ObservableCollection<TCP_Socket> listaPorteAperte = new();
                     foreach (TCP_Socket socket in listaSockets) {
-                        if (socket.IsOpen) {
+                        if (socket.Stato == TCP_Socket.StatoPorta.Aperta) {
                             listaPorteAperte.Add(socket);
                         }
                     }
@@ -453,11 +453,20 @@ namespace PortScanner {
                 case OpzioniFiltri.PorteChiuse:
                     ObservableCollection<TCP_Socket> listaPorteChiuse = new();
                     foreach (TCP_Socket socket in listaSockets) {
-                        if (!socket.IsOpen) {
+                        if (socket.Stato == TCP_Socket.StatoPorta.Chiusa) {
                             listaPorteChiuse.Add(socket);
                         }
                     }
                     dtgScansioni.ItemsSource = listaPorteChiuse;
+                    break;
+                case OpzioniFiltri.PorteFiltrate:
+                    ObservableCollection<TCP_Socket> listaPorteFiltrate = new();
+                    foreach (TCP_Socket socket in listaSockets) {
+                        if (socket.Stato == TCP_Socket.StatoPorta.Filtrata) {
+                            listaPorteFiltrate.Add(socket);
+                        }
+                    }
+                    dtgScansioni.ItemsSource = listaPorteFiltrate;
                     break;
                 case OpzioniFiltri.ServiziRilevati:
                     ObservableCollection<TCP_Socket> listaServiziRilevati = new();
@@ -479,11 +488,11 @@ namespace PortScanner {
                 case OpzioniOrdinamenti.Nessuno:
                     listaSockets = new(listaSockets.OrderBy(s => s.NumeroPorta));
                     break;
-                case OpzioniOrdinamenti.PorteAperteChiuse:
-                    listaSockets = new(listaSockets.OrderByDescending(s => s.IsOpen));
+                case OpzioniOrdinamenti.AperteFiltrateChiuse:
+                    listaSockets = new(listaSockets.OrderBy(s => s.Stato));
                     break;
-                case OpzioniOrdinamenti.PorteChiuseAperte:
-                    listaSockets = new(listaSockets.OrderBy(s => s.IsOpen));
+                case OpzioniOrdinamenti.ChiuseFiltrateAperte:
+                    listaSockets = new(listaSockets.OrderByDescending(s => s.Stato));
                     break;
             }
             dtgScansioni.ItemsSource = listaSockets;

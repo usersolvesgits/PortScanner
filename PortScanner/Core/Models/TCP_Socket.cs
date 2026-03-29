@@ -84,7 +84,7 @@ namespace PortScanner.Core.Models {
         /// <summary>
         /// Indica l'hostname del destinatario.
         /// </summary>
-        public string Hostname { get; private set; }
+        public string? Hostname { get; private set; }
 
         /// <summary>
         /// Indica l'indirizzo IP del destinatario.
@@ -118,6 +118,22 @@ namespace PortScanner.Core.Models {
         public bool IsOpen { get; private set; }
 
         /// <summary>
+        /// Indica tutti i possibili stati di una porta.<br/>
+        /// <see cref="Aperta"/> se la porta risulta essere aperta.<br/>
+        /// <see cref="Chiusa"/> se la porta risulta essere chiusa.<br/>
+        /// <see cref="Filtrata"/> se la porta risulta essere filtrata da qualche firewall o simili.
+        /// </summary>
+        public enum StatoPorta {
+            Aperta,
+            Filtrata,
+            Chiusa
+        }
+        /// <summary>
+        /// Indica lo stato della porta prendendo come base le varie opzioni dell' <see langword="enum"/> <see cref="StatoPorta"/>.
+        /// </summary>
+        public StatoPorta Stato { get; private set; }
+
+        /// <summary>
         /// Indica che tipo di servizio viene usato in quale porta.
         /// </summary>
         public string Servizio { get; private set; }
@@ -136,7 +152,7 @@ namespace PortScanner.Core.Models {
         public TCP_Socket(string Hostname, int NumeroPorta) {
             this.Hostname = Hostname;
             IPAddress[] addresses = Dns.GetHostAddresses(Hostname);
-            this.IPAddress = addresses.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork);
+            IPAddress = addresses.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork);
             this.NumeroPorta = NumeroPorta;
         }
 
@@ -156,24 +172,23 @@ namespace PortScanner.Core.Models {
 
 
         public override string ToString() {
-            string stato = IsOpen ? "Aperta" : "Chiusa";
             return $"Indirizzo IP destinatario: {IPAddress?.ToString() ?? Hostname};\t" +
                    $"Numero della porta: {NumeroPorta};\t" +
-                   $"Stato della porta: {stato};\t" +
+                   $"Stato della porta: {Stato};\t" +
                    $"Servizio: {Servizio}.";
         }
 
 
         /// <summary>
         /// Verifica se la stringa fornita rappresenta una porta valida.
-        /// La porta deve essere un numero compreso tra <see cref="IPEndPoint.MinPort"/> e <see cref="IPEndPoint.MaxPort"/>.
+        /// La porta deve essere un numero compreso tra <see cref="PrimaPorta"/> e <see cref="UltimaPorta"/>.
         /// </summary>
         /// <param name="port">
         /// Stringa che rappresenta il numero di porta da controllare.
         /// </param>
         /// <returns>
-        /// <c>true</c> se la porta è numerica e rientra nell'intervallo valido delle porte TCP/UDP;
-        /// <c>false</c> se la stringa è vuota, non numerica o fuori dall'intervallo consentito.
+        /// <see langword="true"/> se la porta è numerica e rientra nell'intervallo valido delle porte TCP/UDP;
+        /// <see langword="false"/> se la stringa è vuota, non numerica o fuori dall'intervallo consentito.
         /// </returns>
         public static bool CheckValidPort(string port) {
             if (string.IsNullOrWhiteSpace(port)) {
@@ -207,11 +222,10 @@ namespace PortScanner.Core.Models {
         /// </param>
         /// <returns>
         /// Una stringa che rappresenta lo stato della porta nel formato:
-        /// <c><see cref="IsOpen"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>.
+        /// <c><see cref="Stato"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>.
         /// </returns>
         public static string ToCSV(TCP_Socket socket, char separatore) {
-            string StatoPorta = socket.IsOpen ? "Aperta" : "Chiusa";
-            return $"{StatoPorta}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
+            return $"{socket.Stato}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
         }
 
         /// <summary>
@@ -222,11 +236,10 @@ namespace PortScanner.Core.Models {
         /// </param>
         /// <returns>
         /// Una stringa che rappresenta lo stato della porta nel formato:
-        /// <c><see cref="IsOpen"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>.
+        /// <c><see cref="Stato"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>.
         /// </returns>
         public static string ToCSV(TCP_Socket socket, string separatore) {
-            string StatoPorta = socket.IsOpen ? "Aperta" : "Chiusa";
-            return $"{StatoPorta}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
+            return $"{socket.Stato}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
         }
 
         /// <summary>
@@ -242,17 +255,16 @@ namespace PortScanner.Core.Models {
         /// </param>
         /// <returns>
         /// Una stringa che rappresenta lo stato della porta nel formato:
-        /// <c><see cref="IsOpen"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>
+        /// <c><see cref="Stato"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>
         /// oppure
-        /// <c><see cref="IPAddress">,<see cref="IsOpen"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>
+        /// <c><see cref="IPAddress">,<see cref="Stato"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>
         /// se <paramref name="ShowIPAddress"/> è <see langword="true"/>.
         /// </returns>
         public static string ToCSV(TCP_Socket socket, char separatore, bool ShowIPAddress) {
-            string StatoPorta = socket.IsOpen ? "Aperta" : "Chiusa";
             if (ShowIPAddress) {
-                return $"{socket.IPAddress?.ToString()}{separatore}{StatoPorta}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
+                return $"{socket.IPAddress?.ToString()}{separatore}{socket.Stato}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
             }
-            return $"{StatoPorta}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
+            return $"{socket.Stato}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
         }
 
         /// <summary>
@@ -268,17 +280,16 @@ namespace PortScanner.Core.Models {
         /// </param>
         /// <returns>
         /// Una stringa che rappresenta lo stato della porta nel formato:
-        /// <c><see cref="IsOpen"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>
+        /// <c><see cref="Stato"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>
         /// oppure
-        /// <c><see cref="IPAddress">,<see cref="IsOpen"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>
+        /// <c><see cref="IPAddress">,<see cref="Stato"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>
         /// se <paramref name="ShowIPAddress"/> è <see langword="true"/>.
         /// </returns>
         public static string ToCSV(TCP_Socket socket, string separatore, bool ShowIPAddress) {
-            string StatoPorta = socket.IsOpen ? "Aperta" : "Chiusa";
             if (ShowIPAddress) {
-                return $"{socket.IPAddress?.ToString()}{separatore}{StatoPorta}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
+                return $"{socket.IPAddress?.ToString()}{separatore}{socket.Stato}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
             }
-            return $"{StatoPorta}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
+            return $"{socket.Stato}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
         }
 
         /// <summary>
@@ -294,13 +305,22 @@ namespace PortScanner.Core.Models {
         /// Metodo usato per controllare lo stato delle porte.
         /// </summary>
         public void Connect() {
-            using (TcpClient TcpC = new()) {
-                try {
-                    TcpC.Connect(IPAddress, NumeroPorta);
-                    IsOpen = true;
-                } catch (SocketException ex) {
-                    Debug.WriteLine($"Porta numero {NumeroPorta} non raggiungibile!\n{ex}");
-                    IsOpen = false;
+            using TcpClient TcpC = new();
+            try {
+                TcpC.Connect(IPAddress, NumeroPorta);
+                Stato = StatoPorta.Aperta;
+            } catch (SocketException ex) {
+                Debug.WriteLine(ex);
+                switch (ex.SocketErrorCode) {
+                    case SocketError.ConnectionRefused:
+                        Stato = StatoPorta.Chiusa;
+                        break;
+                    case SocketError.TimedOut:
+                        Stato = StatoPorta.Filtrata;
+                        break;
+                    default:
+                        Stato = StatoPorta.Filtrata;
+                        break;
                 }
             }
         }
@@ -312,22 +332,34 @@ namespace PortScanner.Core.Models {
         /// Numero di millisecondi per decretare se una porta è aperta o meno.
         /// </param>
         public void Connect(int timeout) {
-            using (TcpClient TcpC = new()) {
-                try {
-                    if (TcpC.ConnectAsync(IPAddress, NumeroPorta).Wait(timeout)) {
-                        IsOpen = true;
-                    } else {
-                        IsOpen = false;
-                    }
-                } catch (SocketException ex) {
-                    Debug.WriteLine(ex);
-                    IsOpen = false;
-                } catch (AggregateException ex) {
-                    foreach (var innerExceptions in ex.InnerExceptions) { 
-                        Debug.WriteLine(ex); 
-                    }
-                    IsOpen = false;
+            using TcpClient TcpC = new();
+            try {
+                if (!TcpC.ConnectAsync(IPAddress, NumeroPorta).Wait(timeout)) {
+                    Stato = StatoPorta.Filtrata; return;
+                } else {
+                    Stato = StatoPorta.Aperta;
                 }
+            } catch (AggregateException ex) {
+                Debug.WriteLine(ex);
+                if (ex.InnerException is SocketException) {
+                    var eccezione = (SocketException)ex.InnerException;
+                    switch (eccezione.SocketErrorCode) {
+                        case SocketError.ConnectionRefused:
+                            Stato = StatoPorta.Chiusa;
+                            break;
+                        case SocketError.TimedOut:
+                            Stato = StatoPorta.Filtrata;
+                            break;
+                        default:
+                            Stato = StatoPorta.Filtrata;
+                            break;
+                    }
+                } else {
+                    Stato = StatoPorta.Filtrata;
+                }
+            } catch (SocketException ex) {
+                Debug.WriteLine(ex);
+                Stato = StatoPorta.Chiusa;
             }
         }
     }
