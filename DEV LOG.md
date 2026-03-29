@@ -36,10 +36,10 @@ La struttura del progetto è stata pensata per la maggiore scalabilità possibil
 
 **Funzionalità implementate**
 - Creata l'interfaccia grafica principale dell'applicazione.
-- Creati metodi statici della classe TCP_Socket per la formattazione delle informazioni relative alle sockets in formati CSV e JSON.
+- Creati metodi statici della classe *TCP_Socket* per la formattazione delle informazioni relative alle sockets in formati CSV e JSON.
 
 **Bug Fix**
-- Risolto bug che permetteva l'inserimento dall'esterno della proprietà "Servizio" nella classe TCP_Socket.
+- Risolto bug che permetteva l'inserimento dall'esterno della proprietà *Servizio* nella classe *TCP_Socket*.
 
 ---
 
@@ -57,7 +57,7 @@ UI:
 
 Backend:  
 - Aggiunto loop di scansione di base.
-- Modificato il metodo OnClosing() per attivare il messaggio di avvertimento solo quando una scansione non ha finito.
+- Modificato il metodo *OnClosing()* per attivare il messaggio di avvertimento solo quando una scansione non ha finito.
 
 ---
 
@@ -133,10 +133,10 @@ Backend:
 - Modificata la logica dell'esportazione CSV per agire in base a ciò che è presente nella datagrid, e non su quanto presente nella lista di socket.
 
 Util:
-- Spostato il metodo "CheckValidPort(string port)" da MainWindow.xaml.cs a Util.cs.
+- Spostato il metodo *CheckValidPort(string port)* da MainWindow.xaml.cs a *Util.cs*.
 
 TCP_Socket:
-- Aggiunta nuova proprietà booleana "IsOpen".
+- Aggiunta nuova proprietà booleana *IsOpen*.
 - Reso il dizionario per l'individuazione di servizi conosciuti pubblico.
 
 **Bug Fix**
@@ -144,7 +144,7 @@ TCP_Socket:
 
 **Minor Fixes**
 - Modificato il tipo di cursore quando si è sopra i bottoni di esportazione.
-- Modificata della documentazione nella classe TCP_Socket.
+- Modificata della documentazione nella classe *TCP_Socket*.
 - Rimossa l'opzione per scorrere tra le opzioni di filtraggio ed ordinamento usando la rotellina mouse.
 - Modificata la larghezza base dell'applicazione.
 
@@ -154,23 +154,20 @@ TCP_Socket:
 **Attività svolte**
 - Aggiornamenti UI
 - Aggiornamenti backend
-- Modifiche della classe TCP_Socket
+	- Modifiche della classe TCP_Socket
 
 UI:
 - Modificato il testo di spiegazione per il timeout e il suo valore di base.
 
 Backend:
-- Cambiato il metodo di connessione principale da TCP_Socket.Connect() a TCP_Socket.Connect(int timeout).
+- Cambiato il metodo di connessione principale da *TCP_Socket.Connect()* a *TCP_Socket.Connect(int timeout)*.
 
 TCP_Socket:
 - Aggiunte nuove porte nel dizionario dei servizi conosciuti.
-- !!!HUGE!!! Aggiunto metodo TCP_Socket.Connect(int timeout) per rendere il processo di connessione più veloce (https://stackoverflow.com/questions/17118632/how-to-set-the-timeout-for-a-tcpclient).
+- !!!HUGE!!! Aggiunto metodo *TCP_Socket.Connect(int timeout)* per rendere il processo di connessione più veloce (https://stackoverflow.com/questions/17118632/how-to-set-the-timeout-for-a-tcpclient).
 
 **Bug Fix**
 - Fixato bug dove se si impostava un tempo di timeout troppo piccolo (es: 0) si rischiava che le connessioni non registravano un output corretto nell'interfaccia grafica.
-
-**Aggiornamenti Documentazione**
-Andando avanti, si aggiungerà (dove è stato necessario) le fonti da dove si sono ottenute le informazioni.
 
 ---
 
@@ -200,10 +197,10 @@ Backend:
 
 TCP_Socket:
 - Aggiunte nuovi variabili costanti per il numero di porta minima e massima.
-- Spostato il metodo "CheckValidPort(string port)" da Util a TCP_Socket.
+- Spostato il metodo *CheckValidPort(string port)* da Util a *TCP_Socket*.
 
 Struttura del progetto:
-- Rimossa la directory e classe "Util" e spostati i suoi contenuti nel MainWindow.xaml.cs e nella classe TCP_Socket.
+- Rimossa la directory e classe *Util* e spostati i suoi contenuti nel MainWindow.xaml.cs e nella classe *TCP_Socket*.
 
 **Bug Fix**
 - Risolto bug n°2 del giorno *25/03/2026*.
@@ -217,7 +214,7 @@ Struttura del progetto:
 - Modifiche della classe TCP_Socket
 
 UI:
-- Modificata la datagrid per funzionare senza il binding della proprietà "StatoPorta" della classe TCP_Socket.
+- Modificata la datagrid per funzionare senza il binding della proprietà *StatoPorta* della classe *TCP_Socket*.
 - Modificato la casella di testo per scrivere il separatore del salvataggio in CSV.
 
 Backend:
@@ -227,11 +224,11 @@ Backend:
 - Modificato il metodo principale di conversione in formato CSV per consentire l'uso di una stringa al posto di un singolo carattere come separatore.
 
 TCP_Socket:
-- Rimossa la proprietà "StatoPorta".
-- Modificato il metodo Connect(int timeout) per evitare interruzzioni anomale durante la scansione.
+- Rimossa la proprietà *StatoPorta*.
+- Modificato il metodo *Connect(int timeout)* per evitare interruzzioni anomale durante la scansione.
 - Modificata la costante che indica la prima porta disponibile per effettuare la scansione.
 - Aggiornati i metodi di conversione in formato CSV.
-- Aggiunti nuovi overload per i metodi ToCSV per permettere l'utilizzo di una stringa come separatore.
+- Aggiunti nuovi overload per i metodi *ToCSV* per permettere l'utilizzo di una stringa come separatore.
 - Aggiornata ed aggiunta della documentazione dei metodi.
 
 **Bug Fix**
@@ -245,6 +242,7 @@ TCP_Socket:
 - Aggiornamenti backend
 - Modifiche della classe TCP_Socket
 - Modifiche DEV LOG.md
+- Modifiche struttura del progetto
 
 UI:
 - Rimosse le shortcuts dalla sezione dei crediti.
@@ -255,15 +253,18 @@ UI:
 Backend:
 - Aggiunte statistiche nell'esportazione della scansione in formato CSV.
 - Aggiunta nuova opzione di filtraggio.
-- Modificata la logica di filtraggio ed ordinamento per usare la proprietà "Stato" della classe TCP_Socket.
+- Modificata la logica di filtraggio ed ordinamento per usare la proprietà *Stato* della classe TCP_Socket.
 
 TCP_Socket:
-- Rimossa proprietà booleana "IsOpen" e sostituita con un enum "Stato".
+- Rimossa proprietà booleana *IsOpen* e sostituita con un enum *Stato*.
 - Modificata documentazione.
-- Modificati i metodi Connect() per decretare se una porta è aperta, filtrata o chiusa.
+- Modificati i metodi *Connect()* per decretare se una porta è aperta, filtrata o chiusa.
 
 DEV LOG:
 - Aggiunti separatori per i vari giorni.
 
+Struttura del progetto:
+- Cambiato il nome alle directories per seguire la convezione *snake_case*.
+
 **Problemi riscontrati**
-- 1) Se si prova ad effettuare una scansione e si imposta un timeout inferiore ai ~3000ms, le porte "Filtrate" sono dei falsi.
+- 1) Se si prova ad effettuare una scansione e si imposta un timeout inferiore ai ~3000ms, le porte *Filtrate* sono dei falsi.

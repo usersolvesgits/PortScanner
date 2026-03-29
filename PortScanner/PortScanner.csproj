@@ -9,18 +9,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Assets\Icons\lente_ingrandimento.ico" />
-    <None Remove="Assets\Icons\lente_ingrandimento.png" />
-    <None Remove="Assets\Icons\windmill.ico" />
+    <None Remove="assets\icons\lente_ingrandimento.ico" />
+    <None Remove="assets\icons\lente_ingrandimento.png" />
+    <None Remove="assets\icons\windmill.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Assets\Icons\lente_ingrandimento.ico" />
-    <Resource Include="Assets\Icons\windmill.ico" />
+    <Resource Include="assets\icons\lente_ingrandimento.ico" />
+    <Resource Include="assets\icons\windmill.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Specifiche\" />
+    <Folder Include="specs\" />
   </ItemGroup>
 
 </Project>

@@ -111,13 +111,6 @@ namespace PortScanner.Core.Models {
         }
 
         /// <summary>
-        /// Indica lo stato di connessione di una porta come valore booleano.
-        /// Se impostato su <see langword="true"/> la porta è aperta.
-        /// Se impostato su <see langword="false"/> la porta è chiusa.
-        /// </summary>
-        public bool IsOpen { get; private set; }
-
-        /// <summary>
         /// Indica tutti i possibili stati di una porta.<br/>
         /// <see cref="Aperta"/> se la porta risulta essere aperta.<br/>
         /// <see cref="Chiusa"/> se la porta risulta essere chiusa.<br/>
@@ -137,7 +130,6 @@ namespace PortScanner.Core.Models {
         /// Indica che tipo di servizio viene usato in quale porta.
         /// </summary>
         public string Servizio { get; private set; }
-
 
 
         /// <summary>
