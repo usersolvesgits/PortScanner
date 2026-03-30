@@ -163,6 +163,12 @@ namespace PortScanner.Core.Models {
         }
 
 
+        /// <summary>
+        /// Override del metodo <see cref="object.ToString"/> della classe <see cref="TCP_Socket"/>
+        /// </summary>
+        /// <returns>
+        /// Una <see langword="string"/> che descrive un breve la socket in questione.
+        /// </returns>
         public override string ToString() {
             return $"Indirizzo IP destinatario: {IPAddress?.ToString() ?? Hostname};\t" +
                    $"Numero della porta: {NumeroPorta};\t" +

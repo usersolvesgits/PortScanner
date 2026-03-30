@@ -268,3 +268,16 @@ Struttura del progetto:
 
 **Problemi riscontrati**
 - 1) Se si prova ad effettuare una scansione e si imposta un timeout inferiore ai ~3000ms, le porte *Filtrate* sono dei falsi.
+
+---
+
+### [30/03/2026]
+**Attività svolte**
+- Aggiornamenti backend
+- Aggiornamenti classe TCP_Socket
+
+Backend:
+- Aggiunta la logica per l'esportazione in formato JSON.
+
+TCP_Socket:
+- Aggiunta un ***GOCCIO*** di documentazione.

@@ -1,18 +1,24 @@
 ﻿/*
  *  TODOS:
+ *      GENERAL:
+ *          -Prima release:
+ *              -Aggiungere "watermark"
+ *              -Aggiungere il counter della versione attuale dell'applicazione
+ *      -TCP_Socket:
+ *          -Sistemare logica di connessione per un vero controllo tra filtrate e chiuse
  *      -MainWindow.xaml.cs:
- *          -Esportazione_JSON()
  *          -Rifare il metodo di fermata della scansione
  */
 
 
 using Microsoft.Win32;
+using PortScanner.Core.Models;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Text.Json;
 using System.Windows;
-using PortScanner.Core.Models;
 using System.Windows.Input;
 using SelectionChangedEventArgs = System.Windows.Controls.SelectionChangedEventArgs;
 
@@ -411,7 +417,7 @@ namespace PortScanner {
                 for (int i = 0; i < dtgScansioni.Items.Count; i++) {
                     var socket = dtgScansioni.Items[i] as TCP_Socket;
                     if (i == 0) {
-                        writer.WriteLine($"Scansione avviata: [{dataScansione}]");
+                        writer.WriteLine($"Scansione avviata: [{dataScansione.ToString("dd/MM/yyyy HH:mm:ss")}]");
                         writer.WriteLine($"Durata della scansione: [{durataScansione_l}]ms");
                         writer.WriteLine($"Target: {socket.IPAddress?.ToString()}");
                         writer.WriteLine($"Stato della porta{separatoreCSV}Numero della porta{separatoreCSV}Servizio rilevato");
@@ -428,7 +434,66 @@ namespace PortScanner {
             }
         }
         private void Esportazione_JSON(object sender, RoutedEventArgs e) {
-            //TODO -> logica esportazione JSON
+            if (dtgScansioni.Items.Count == 0) {
+                MessageBox.Show("Attenzione: Nessun elemento da esportare trovato!",
+                                "Attenzione",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                return;
+            }
+
+            SaveFileDialog dlg = new() {
+                Filter = "JSON Files (*.json)|*json",
+                AddExtension = true,
+                DefaultExt = ".json"
+            };
+
+            string path = string.Empty;
+            if (dlg.ShowDialog() == true) {
+                path = dlg.FileName;
+            }
+
+            if (string.IsNullOrWhiteSpace(path)) {
+                MessageBox.Show("ATTENZIONE: Selezionare un percorso file corretto!",
+                                "Attenzione",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                return;
+            }
+
+            try {
+                List<TCP_Socket> listaJSON = new();
+                foreach (TCP_Socket item in dtgScansioni.Items) {
+                    listaJSON.Add(item);
+                }
+                var listaJson = listaJSON.Select(socket => new {
+                    IPAddress = socket.IPAddress?.ToString(),
+                    NumeroPorta = socket.NumeroPorta,
+                    Stato = socket.Stato.ToString(),
+                    Servizio = TCP_Socket.ServiziConosciuti.ContainsKey(socket.NumeroPorta)
+                        ? TCP_Socket.ServiziConosciuti[socket.NumeroPorta]
+                        : "Sconosciuto"
+                });
+
+                var exportObject = new {
+                    DataScansione = dataScansione.ToString("dd/MM/yyyy HH:mm:ss"),
+                    DurataMs = durataScansione_l,
+                    Target = target,
+                    Risultati = listaJson
+                };
+
+                string json = JsonSerializer.Serialize(exportObject, new JsonSerializerOptions {
+                    WriteIndented = true
+                });
+
+                File.WriteAllText(path, json);
+            } catch (Exception ex) {
+                Debug.WriteLine(ex);
+                MessageBox.Show("Errore durante l'esportazione JSON.",
+                                "Errore",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Error);
+            }
         }
 
         private void OpzioniScansione_CambioFiltro(object sender, SelectionChangedEventArgs e) {
