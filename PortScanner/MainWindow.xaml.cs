@@ -12,15 +12,17 @@
 
 
 using Microsoft.Win32;
-using PortScanner.Core.Models;
+using PortScanner.core.models;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Input;
 using SelectionChangedEventArgs = System.Windows.Controls.SelectionChangedEventArgs;
+using AddressFamily = System.Net.Sockets.AddressFamily;
 
 
 namespace PortScanner {
@@ -44,7 +46,7 @@ namespace PortScanner {
 
         ObservableCollection<TCP_Socket> listaSockets = new();
         DateTime dataScansione;
-        string target = string.Empty;
+        IPAddress targetIPAddress;
         int rangePortMin,
             rangePortMax;
         int porteTotali = 0,
@@ -189,8 +191,9 @@ namespace PortScanner {
 
             dataScansione = DateTime.Now;
             for (int currentPortNum = rangePortMin; currentPortNum <= rangePortMax; currentPortNum++) {
-                TCP_Socket socket = new(target, currentPortNum);
+                TCP_Socket socket;
                 try {
+                    socket = new(targetIPAddress, currentPortNum);
                     porteScansionate++;
 
                     progressoScansione = (double)porteScansionate / porteTotali * 100;
@@ -202,7 +205,7 @@ namespace PortScanner {
                     }
 
                     socket.Connect(timeoutScansione);
-                    if (socket.Stato == TCP_Socket.StatoPorta.Aperta) {
+                    if (socket.IsOpen) {
                         porteAperte++;
                     }
                 } catch (Exception ex) {
@@ -246,7 +249,7 @@ namespace PortScanner {
                     }
                 });
 
-                if (socket.Stato == TCP_Socket.StatoPorta.Aperta) {
+                if (socket.IsOpen) {
                     porteApertePrecedente++;
                 }
             }
@@ -269,7 +272,6 @@ namespace PortScanner {
                 txtPorteScansionate.Text = txtPorteScansionate.Text.Replace(porteScansionate.ToString(), "0");
             });
 
-            //////HOSTNAME / IP-ADDRESS//////
             if (string.IsNullOrWhiteSpace(txtIPAddress.Text)) {
                 MessageBox.Show("Attenzione: Inserire un hostname o indirizzo IP valido!",
                                 "Attenzione",
@@ -279,9 +281,29 @@ namespace PortScanner {
                 txtIPAddress.Focus();
                 return;
             }
-            target = txtIPAddress.Text.Trim().ToLower();
+            string target = txtIPAddress.Text.Trim().ToLower();
 
-            //////PORTE//////
+            bool check = IPAddress.TryParse(target, out targetIPAddress);
+            if (!check) {
+                try {
+                    targetIPAddress = Dns.GetHostAddresses(target).FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork);
+                    if (targetIPAddress is null) {
+                        MessageBox.Show("Errore: Impossibile trovare un indirizzo IP valido per l'hostname dato!",
+                                    "Errore",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Error);
+                        return;
+                    }
+                } catch (Exception ex) {
+                    Debug.WriteLine(ex);
+                    MessageBox.Show("Errore: Impossibile trovare un indirizzo IP valido per l'hostname dato!",
+                                    "Errore",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Error);
+                    return;
+                }
+            }
+
             if (!TCP_Socket.CheckValidPort(txtPortMin.Text)) {
                 MessageBox.Show($"Attenzione: Inserire un numero di porta maggiore o uguale a {TCP_Socket.PrimaPorta}!",
                                 "Attenzione",
@@ -315,7 +337,6 @@ namespace PortScanner {
                 return;
             }
 
-            //////TIMEOUT//////
             string timeoutString = txtTimeout.Text.Trim();
             if (string.IsNullOrWhiteSpace(timeoutString)) {
                 MessageBox.Show("Attenzione: Inserire un timeout in millisecondi!",
@@ -326,7 +347,7 @@ namespace PortScanner {
                 txtTimeout.Focus();
                 return;
             }
-            bool check = int.TryParse(timeoutString, out timeoutScansione);
+            check = int.TryParse(timeoutString, out timeoutScansione);
             if (!check) {
                 MessageBox.Show("Attenzione: Inserire un timeout in millisecondi valido come numero intero!",
                                 "Attenzione",
@@ -346,7 +367,6 @@ namespace PortScanner {
                 return;
             }
 
-            //////THREAD SCANSIONE//////
             Thread threadScansione;
             try {
                 threadScansione = new(new ThreadStart(Scan_Scansione));
@@ -471,14 +491,14 @@ namespace PortScanner {
                     NumeroPorta = socket.NumeroPorta,
                     Stato = socket.Stato.ToString(),
                     Servizio = TCP_Socket.ServiziConosciuti.ContainsKey(socket.NumeroPorta)
-                        ? TCP_Socket.ServiziConosciuti[socket.NumeroPorta]
-                        : "Sconosciuto"
+                                ? TCP_Socket.ServiziConosciuti[socket.NumeroPorta]
+                                : "Sconosciuto"
                 });
 
                 var exportObject = new {
                     DataScansione = dataScansione.ToString("dd/MM/yyyy HH:mm:ss"),
                     DurataMs = durataScansione_l,
-                    Target = target,
+                    Target = targetIPAddress?.ToString(),
                     Risultati = listaJson
                 };
 
@@ -506,7 +526,6 @@ namespace PortScanner {
                     dtgScansioni.ItemsSource = listaSockets;
                     break;
                 case OpzioniFiltri.PorteAperte:
-                    dtgScansioni.ItemsSource = listaSockets;
                     ObservableCollection<TCP_Socket> listaPorteAperte = new();
                     foreach (TCP_Socket socket in listaSockets) {
                         if (socket.Stato == TCP_Socket.StatoPorta.Aperta) {

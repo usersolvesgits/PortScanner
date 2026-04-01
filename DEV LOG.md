@@ -253,7 +253,7 @@ UI:
 Backend:
 - Aggiunte statistiche nell'esportazione della scansione in formato CSV.
 - Aggiunta nuova opzione di filtraggio.
-- Modificata la logica di filtraggio ed ordinamento per usare la proprietà *Stato* della classe TCP_Socket.
+- Modificata la logica di filtraggio ed ordinamento per usare la proprietà *Stato* della classe *TCP_Socket*.
 
 TCP_Socket:
 - Rimossa proprietà booleana *IsOpen* e sostituita con un enum *Stato*.
@@ -281,3 +281,21 @@ Backend:
 
 TCP_Socket:
 - Aggiunta un ***GOCCIO*** di documentazione.
+
+---
+
+### [01/04/2026]
+**Attività svolte**
+- Aggiornamenti backend
+- Aggiornamenti classe TCP_Socket
+
+Backend:
+- Al posto di usare il costruttore *TCP_Socket(string Hostname, int NumeroPorta)* adesso si usa il costruttore *TCP_Socket(IPAddress IPAddress, int NumeroPorta)*
+  per evitare il continuo calcolo dell'indirizzo IP dell'hostname.
+
+TCP_Socket:
+- Ricreata la proprietà booleana *IsOpen* per controllare velocemente se una porta è aperta o meno.
+- Rimossa la creazione di una MessageBox all'interno del metodo *CheckValidPort(string port)*.
+
+**Minor Fixes**:
+- Tolta una linea di codice inutile nelle opzioni di filtraggio della scansione.

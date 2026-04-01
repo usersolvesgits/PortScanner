@@ -4,7 +4,7 @@ using System.Net.Sockets;
 using System.Text.Json;
 using System.Windows;
 
-namespace PortScanner.Core.Models {
+namespace PortScanner.core.models {
     public class TCP_Socket {
         private int _numPorta;
 
@@ -127,6 +127,13 @@ namespace PortScanner.Core.Models {
         public StatoPorta Stato { get; private set; }
 
         /// <summary>
+        /// Proprietà booleana che indica se una porta o meno.<br/>
+        /// Se risulta <see langword="true"/>, allora la porta è aperta.<br/>
+        /// Se risulta <see langword="false"/> allora la porta NON è aperta.
+        /// </summary>
+        public bool IsOpen { get; private set; }
+
+        /// <summary>
         /// Indica che tipo di servizio viene usato in quale porta.
         /// </summary>
         public string Servizio { get; private set; }
@@ -143,8 +150,11 @@ namespace PortScanner.Core.Models {
         /// </param>
         public TCP_Socket(string Hostname, int NumeroPorta) {
             this.Hostname = Hostname;
-            IPAddress[] addresses = Dns.GetHostAddresses(Hostname);
-            IPAddress = addresses.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork);
+            IPAddress[] indirizziPossibili = Dns.GetHostAddresses(Hostname);
+            IPAddress = indirizziPossibili.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork);
+            if (IPAddress == null) {
+                throw new InvalidOperationException($"Impossibile trarre un indirizzo IP dall'hostname {Hostname}");
+            }
             this.NumeroPorta = NumeroPorta;
         }
 
@@ -167,7 +177,7 @@ namespace PortScanner.Core.Models {
         /// Override del metodo <see cref="object.ToString"/> della classe <see cref="TCP_Socket"/>
         /// </summary>
         /// <returns>
-        /// Una <see langword="string"/> che descrive un breve la socket in questione.
+        /// Una <see langword="string"/> che descrive in breve la socket in questione.
         /// </returns>
         public override string ToString() {
             return $"Indirizzo IP destinatario: {IPAddress?.ToString() ?? Hostname};\t" +
@@ -198,10 +208,6 @@ namespace PortScanner.Core.Models {
                 portInt = int.Parse(port);
             } catch (Exception ex) {
                 Debug.WriteLine(ex);
-                MessageBox.Show("Attenzione: Assicurarsi che il valore inserito sia numerico!",
-                                "Attenzione",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Warning);
                 return false;
             }
 
@@ -307,6 +313,7 @@ namespace PortScanner.Core.Models {
             try {
                 TcpC.Connect(IPAddress, NumeroPorta);
                 Stato = StatoPorta.Aperta;
+                IsOpen = true;
             } catch (SocketException ex) {
                 Debug.WriteLine(ex);
                 switch (ex.SocketErrorCode) {
@@ -320,6 +327,7 @@ namespace PortScanner.Core.Models {
                         Stato = StatoPorta.Filtrata;
                         break;
                 }
+                IsOpen = false;
             }
         }
 
@@ -333,9 +341,11 @@ namespace PortScanner.Core.Models {
             using TcpClient TcpC = new();
             try {
                 if (!TcpC.ConnectAsync(IPAddress, NumeroPorta).Wait(timeout)) {
-                    Stato = StatoPorta.Filtrata; return;
+                    Stato = StatoPorta.Filtrata;
+                    IsOpen = false;
                 } else {
                     Stato = StatoPorta.Aperta;
+                    IsOpen = true;
                 }
             } catch (AggregateException ex) {
                 Debug.WriteLine(ex);
@@ -355,9 +365,11 @@ namespace PortScanner.Core.Models {
                 } else {
                     Stato = StatoPorta.Filtrata;
                 }
+                IsOpen = false;
             } catch (SocketException ex) {
                 Debug.WriteLine(ex);
                 Stato = StatoPorta.Chiusa;
+                IsOpen = false;
             }
         }
     }
