@@ -2,6 +2,7 @@
 
 ## Introduzione
 Questo documento riporta il progresso dello sviluppo del progetto.  
+
 ### Disclaimer
 La struttura del progetto è stata pensata per la maggiore scalabilità possibile, per questo potrebbe sembrare esagerata.
 
@@ -297,5 +298,46 @@ TCP_Socket:
 - Ricreata la proprietà booleana *IsOpen* per controllare velocemente se una porta è aperta o meno.
 - Rimossa la creazione di una MessageBox all'interno del metodo *CheckValidPort(string port)*.
 
-**Minor Fixes**:
+**Minor Fixes**
 - Tolta una linea di codice inutile nelle opzioni di filtraggio della scansione.
+
+---
+
+### [03/04/2026]
+**Attività svolte**
+- Aggiornamenti UI
+- Aggiornamenti backend
+- Aggiornamenti classe TCP_Socket
+- Creazione di nuove classi
+- Cambiamenti struttura del progetto
+
+UI:
+- Aggiunta opzione per scegliere che tipo di scansione eseguire.
+- Modificata la lunghezza base per la casella di testo per il separatore CSV.
+
+Backend:
+- Aggiornato il metodo di uscita dell'applicazione.
+- Aggiunta logica di selezione del tipo di scansione.
+- Cambiata la logica di visualizzazione dei pop-up "FAQ".
+- Fatto si che la sezione "Statistiche scansioni" dell'interfaccia grafica si aggiorni automaticamente per il conteggio delle porte aperte.
+
+Base_Socket:
+- Creata come classe parente con proprietà e metodi condivisi con le subclassi *UDP_Socket* e *TCP_Socket*.
+
+UDP_Socket:
+- Creata subclasse di *Base_Socket* per la gestione delle connessioni con protocollo UDP.
+
+TCP_Socket:
+- Rimosse proprietà e metodi che possono essere comuni tra le varie classi derivanti da *Base_Socket*.
+
+FAQ:
+- Classe creata per ospitare la logica di visualizzazione delle finestre della sezione "FAQ" dell'interfaccia grafica.
+
+**Minor Fixes**
+- Cambiate il nome delle costanti in tutto il progetto per seguire la convenzione *SCREAMING_SNAKE_CASE*.
+
+**Bug Fix**
+- Risolto bug riguardante il fatto che quando veniva fermata una scansione (forzatamente o non) non restituiva i risultati corretti di una scansione.
+
+**Problemi riscontrati**
+- 1) Se si prova ad impostare dei filtri e delle impostazioni di ordinamento allo stesso tempo, la prima opzione impostata verrà oscurata dalle seguenti.

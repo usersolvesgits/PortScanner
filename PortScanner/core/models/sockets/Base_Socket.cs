@@ -2,21 +2,23 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
-using System.Windows;
 
-namespace PortScanner.core.models {
-    public class TCP_Socket {
-        private int _numPorta;
+namespace PortScanner.core.models.sockets {
+    /// <summary>
+    /// Classe base per le classi <see cref="TCP_Socket"/> e <see cref="UDP_Socket"/>.
+    /// </summary>
+    public abstract class Base_Socket {
+        protected int _numPorta;
 
 
         /// <summary>
         /// Specifica la prima porta da dove è possibile iniziare una scansione
         /// </summary>
-        public const int PrimaPorta = 1;
+        public const int PRIMA_PORTA = 1;
         /// <summary>
         /// Specifica l'ultima porta da dove è possibile iniziare una scansione
         /// </summary>
-        public const int UltimaPorta = 65535;
+        public const int ULTIMA_PORTA = 65535;
 
 
         /// <summary>
@@ -84,19 +86,19 @@ namespace PortScanner.core.models {
         /// <summary>
         /// Indica l'hostname del destinatario.
         /// </summary>
-        public string? Hostname { get; private set; }
+        public string? Hostname { get; protected set; }
 
         /// <summary>
         /// Indica l'indirizzo IP del destinatario.
         /// </summary>
-        public IPAddress IPAddress { get; private set; }
+        public IPAddress IPAddress { get; protected set; }
 
         /// <summary>
         /// Indica il numero della porta.
         /// </summary>
         public int NumeroPorta {
             get { return _numPorta; }
-            private set {
+            protected set {
                 if (value < IPEndPoint.MinPort || value > IPEndPoint.MaxPort) {
                     throw new ArgumentOutOfRangeException(nameof(value), $"Il valore inserito deve essere un numero compreso tra {IPEndPoint.MinPort} e {IPEndPoint.MaxPort}!");
                 } else {
@@ -121,26 +123,27 @@ namespace PortScanner.core.models {
             Filtrata,
             Chiusa
         }
+
         /// <summary>
         /// Indica lo stato della porta prendendo come base le varie opzioni dell' <see langword="enum"/> <see cref="StatoPorta"/>.
         /// </summary>
-        public StatoPorta Stato { get; private set; }
+        public StatoPorta Stato { get; protected set; }
 
         /// <summary>
         /// Proprietà booleana che indica se una porta o meno.<br/>
         /// Se risulta <see langword="true"/>, allora la porta è aperta.<br/>
         /// Se risulta <see langword="false"/> allora la porta NON è aperta.
         /// </summary>
-        public bool IsOpen { get; private set; }
+        public bool IsOpen { get; protected set; }
 
         /// <summary>
         /// Indica che tipo di servizio viene usato in quale porta.
         /// </summary>
-        public string Servizio { get; private set; }
+        public string Servizio { get; protected set; }
 
 
         /// <summary>
-        /// Costruttore della classe <see cref="TCP_Socket"/>.
+        /// Costruttore della classe <see cref="Base_Socket"/>.
         /// </summary>
         /// <param name="Hostname">
         /// Stringa rappresentante l'hostname.
@@ -148,7 +151,7 @@ namespace PortScanner.core.models {
         /// <param name="NumeroPorta">
         /// Indica il numero della porta della socket.
         /// </param>
-        public TCP_Socket(string Hostname, int NumeroPorta) {
+        public Base_Socket(string Hostname, int NumeroPorta) {
             this.Hostname = Hostname;
             IPAddress[] indirizziPossibili = Dns.GetHostAddresses(Hostname);
             IPAddress = indirizziPossibili.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork);
@@ -159,7 +162,7 @@ namespace PortScanner.core.models {
         }
 
         /// <summary>
-        /// Costruttore della classe <see cref="TCP_Socket"/>.
+        /// Costruttore della classe <see cref="Base_Socket"/>.
         /// </summary>
         /// <param name="IPAddress">
         /// <see cref="System.Net.IPAddress"/> del destinatario.
@@ -167,14 +170,14 @@ namespace PortScanner.core.models {
         /// <param name="NumeroPorta">
         /// Indica il numero della porta della socket.
         /// </param>
-        public TCP_Socket(IPAddress IPAddress, int NumeroPorta) {
+        public Base_Socket(IPAddress IPAddress, int NumeroPorta) {
             this.IPAddress = IPAddress;
             this.NumeroPorta = NumeroPorta;
         }
 
 
         /// <summary>
-        /// Override del metodo <see cref="object.ToString"/> della classe <see cref="TCP_Socket"/>
+        /// Override del metodo <see cref="object.ToString"/> della classe <see cref="Base_Socket"/>
         /// </summary>
         /// <returns>
         /// Una <see langword="string"/> che descrive in breve la socket in questione.
@@ -211,7 +214,7 @@ namespace PortScanner.core.models {
                 return false;
             }
 
-            if (portInt < PrimaPorta || portInt > UltimaPorta) {
+            if (portInt < PRIMA_PORTA || portInt > ULTIMA_PORTA) {
                 return false;
             }
 
@@ -228,7 +231,7 @@ namespace PortScanner.core.models {
         /// Una stringa che rappresenta lo stato della porta nel formato:
         /// <c><see cref="Stato"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>.
         /// </returns>
-        public static string ToCSV(TCP_Socket socket, char separatore) {
+        public static string ToCSV(Base_Socket socket, char separatore) {
             return $"{socket.Stato}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
         }
 
@@ -242,7 +245,7 @@ namespace PortScanner.core.models {
         /// Una stringa che rappresenta lo stato della porta nel formato:
         /// <c><see cref="Stato"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>.
         /// </returns>
-        public static string ToCSV(TCP_Socket socket, string separatore) {
+        public static string ToCSV(Base_Socket socket, string separatore) {
             return $"{socket.Stato}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
         }
 
@@ -264,7 +267,7 @@ namespace PortScanner.core.models {
         /// <c><see cref="IPAddress">,<see cref="Stato"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>
         /// se <paramref name="ShowIPAddress"/> è <see langword="true"/>.
         /// </returns>
-        public static string ToCSV(TCP_Socket socket, char separatore, bool ShowIPAddress) {
+        public static string ToCSV(Base_Socket socket, char separatore, bool ShowIPAddress) {
             if (ShowIPAddress) {
                 return $"{socket.IPAddress?.ToString()}{separatore}{socket.Stato}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
             }
@@ -289,7 +292,7 @@ namespace PortScanner.core.models {
         /// <c><see cref="IPAddress">,<see cref="Stato"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>
         /// se <paramref name="ShowIPAddress"/> è <see langword="true"/>.
         /// </returns>
-        public static string ToCSV(TCP_Socket socket, string separatore, bool ShowIPAddress) {
+        public static string ToCSV(Base_Socket socket, string separatore, bool ShowIPAddress) {
             if (ShowIPAddress) {
                 return $"{socket.IPAddress?.ToString()}{separatore}{socket.Stato}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
             }
@@ -297,80 +300,15 @@ namespace PortScanner.core.models {
         }
 
         /// <summary>
-        /// Formatta le informazioni di un oggetto <see cref="TCP_Socket"/> in una stringa JSON.
+        /// Formatta le informazioni di un oggetto <see cref="Base_Socket"/> in una stringa JSON.
         /// </summary>
-        /// <param name="socket">Un oggetto <see cref="TCP_Socket"/> da convertire in formato JSON.</param>
-        /// <returns>Una stringa contenente la rappresentazione JSON del <see cref="TCP_Socket"/> specificato.</returns>
-        public static string ToJSON(TCP_Socket socket) {
+        /// <param name="socket">Un oggetto <see cref="Base_Socket"/> da convertire in formato JSON.</param>
+        /// <returns>Una stringa contenente la rappresentazione JSON del <see cref="Base_Socket"/> specificato.</returns>
+        public static string ToJSON(Base_Socket socket) {
             return JsonSerializer.Serialize(socket);
         }
 
-        /// <summary>
-        /// Metodo usato per controllare lo stato delle porte.
-        /// </summary>
-        public void Connect() {
-            using TcpClient TcpC = new();
-            try {
-                TcpC.Connect(IPAddress, NumeroPorta);
-                Stato = StatoPorta.Aperta;
-                IsOpen = true;
-            } catch (SocketException ex) {
-                Debug.WriteLine(ex);
-                switch (ex.SocketErrorCode) {
-                    case SocketError.ConnectionRefused:
-                        Stato = StatoPorta.Chiusa;
-                        break;
-                    case SocketError.TimedOut:
-                        Stato = StatoPorta.Filtrata;
-                        break;
-                    default:
-                        Stato = StatoPorta.Filtrata;
-                        break;
-                }
-                IsOpen = false;
-            }
-        }
-
-        /// <summary>
-        /// Metodo usato per controllare lo stato delle porte.
-        /// </summary>
-        /// <param name="timeout">
-        /// Numero di millisecondi per decretare se una porta è aperta o meno.
-        /// </param>
-        public void Connect(int timeout) {
-            using TcpClient TcpC = new();
-            try {
-                if (!TcpC.ConnectAsync(IPAddress, NumeroPorta).Wait(timeout)) {
-                    Stato = StatoPorta.Filtrata;
-                    IsOpen = false;
-                } else {
-                    Stato = StatoPorta.Aperta;
-                    IsOpen = true;
-                }
-            } catch (AggregateException ex) {
-                Debug.WriteLine(ex);
-                if (ex.InnerException is SocketException) {
-                    var eccezione = (SocketException)ex.InnerException;
-                    switch (eccezione.SocketErrorCode) {
-                        case SocketError.ConnectionRefused:
-                            Stato = StatoPorta.Chiusa;
-                            break;
-                        case SocketError.TimedOut:
-                            Stato = StatoPorta.Filtrata;
-                            break;
-                        default:
-                            Stato = StatoPorta.Filtrata;
-                            break;
-                    }
-                } else {
-                    Stato = StatoPorta.Filtrata;
-                }
-                IsOpen = false;
-            } catch (SocketException ex) {
-                Debug.WriteLine(ex);
-                Stato = StatoPorta.Chiusa;
-                IsOpen = false;
-            }
-        }
+        public abstract void Connect();
+        public abstract void Connect(int timeout);
     }
 }

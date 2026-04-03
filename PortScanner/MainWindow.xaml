@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PortScanner"
         mc:Ignorable="d"
-        Title="Port Scanner" Icon="/assets/icons/lente_ingrandimento.ico"
+        Title="Port Scanner" Icon="/core/assets/icons/lente_ingrandimento.ico"
         WindowStartupLocation="CenterScreen"
         Height="500" Width="1100" MinHeight="500" MinWidth="800"
         PreviewKeyDown="PortScanner_ShortCuts">
@@ -62,6 +62,13 @@
                     <StackPanel Grid.Column="0" Margin="15" VerticalAlignment="Top">
                         <TextBlock Text="Parametri Scansione" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
 
+                        <TextBlock Text="Tipo di scansione:"/>
+                        <ComboBox Name="cmbTipoScansione" Margin="0, 5, 0, 10"
+                                  SelectionChanged="OpzioniScansione_TipoScansione" PreviewMouseWheel="OpzioniScansione_MouseWheel">
+                            <ComboBoxItem Content="TCP" IsSelected="True"/>
+                            <ComboBoxItem Content="UDP"/>
+                        </ComboBox>
+
                         <TextBlock Text="IP/Hostname:"/>
                         <TextBox Name="txtIPAddress" Margin="0,5,0,10" Text="localhost"/>
 
@@ -110,7 +117,7 @@
                             <TextBlock Text="Separatore:" VerticalAlignment="Center" Margin="10,0,5,0"/>
 
                             <TextBox Name="txtSeparatoreCSV" Text=";"
-                                     Margin="10, 0, 0, 0" Height="30" Width="100"
+                                     Margin="10, 0, 0, 0" Height="30" Width="75"
                                      VerticalContentAlignment="Center"/>
                         </StackPanel>
                         <Button Name="btnEsportaJSON" Content="Esporta JSON" Click="Esportazione_JSON" 

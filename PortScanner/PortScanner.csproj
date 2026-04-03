@@ -9,14 +9,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="assets\icons\lente_ingrandimento.ico" />
-    <None Remove="assets\icons\lente_ingrandimento.png" />
-    <None Remove="assets\icons\windmill.ico" />
+    <None Remove="core\assets\icons\lente_ingrandimento.ico" />
+    <None Remove="core\assets\icons\lente_ingrandimento.png" />
+    <None Remove="core\assets\icons\windmill.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="assets\icons\lente_ingrandimento.ico" />
-    <Resource Include="assets\icons\windmill.ico" />
+    <Resource Include="core\assets\icons\lente_ingrandimento.ico" />
+    <Resource Include="core\assets\icons\windmill.ico" />
   </ItemGroup>
 
   <ItemGroup>

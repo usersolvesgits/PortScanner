@@ -1,6 +1,7 @@
 ﻿/*
  *  TODOS:
  *      GENERAL:
+ *          -~Permettere scansioni UDP~
  *          -Prima release:
  *              -Aggiungere "watermark"
  *              -Aggiungere il counter della versione attuale dell'applicazione
@@ -12,7 +13,6 @@
 
 
 using Microsoft.Win32;
-using PortScanner.core.models;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -21,15 +21,16 @@ using System.Net;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Input;
-using SelectionChangedEventArgs = System.Windows.Controls.SelectionChangedEventArgs;
 using AddressFamily = System.Net.Sockets.AddressFamily;
-
+using SelectionChangedEventArgs = System.Windows.Controls.SelectionChangedEventArgs;
+using PortScanner.core.models;
+using PortScanner.core.models.sockets;
 
 namespace PortScanner {
     public partial class MainWindow : Window {
-        const string urlSviluppatore = "https://github.com/usersolvesgits";
-        const string urlAzienda = "https://www.sirius.to.it/";
-        const int intervalloAggiornamentoProgressBar = 2;
+        const string URL_SVILUPPATORE = "https://github.com/usersolvesgits";
+        const string URL_AZIENDA = "https://www.sirius.to.it/";
+        const int INTERVALLO_AGGIORNAMENTO_PROGRESSBAR = 2;
 
         enum OpzioniFiltri {
             Nessuno,
@@ -43,8 +44,11 @@ namespace PortScanner {
             AperteFiltrateChiuse,
             ChiuseFiltrateAperte
         }
-
-        ObservableCollection<TCP_Socket> listaSockets = new();
+        enum OpzioniTipoScansione {
+            TCP,
+            UDP
+        }
+        ObservableCollection<Base_Socket> listaSockets = new();
         DateTime dataScansione;
         IPAddress targetIPAddress;
         int rangePortMin,
@@ -56,7 +60,7 @@ namespace PortScanner {
         bool scansioneAttiva = false,
              richiestaFermataScansione = false;
         int timeoutScansione;
-        double progressoScansione;
+        OpzioniTipoScansione tipoScansione = OpzioniTipoScansione.TCP;
 
         public MainWindow() {
             InitializeComponent();
@@ -144,14 +148,14 @@ namespace PortScanner {
         }
 
         private void Esci(object sender, RoutedEventArgs e) {
-            Environment.Exit(0);
+            Application.Current.Shutdown();
         }
 
         private void Crediti_Sviluppatore(object sender, RoutedEventArgs e) {
-            OpenLink(urlSviluppatore);
+            OpenLink(URL_SVILUPPATORE);
         }
         private void Crediti_Azienda(object sender, RoutedEventArgs e) {
-            OpenLink(urlAzienda);
+            OpenLink(URL_AZIENDA);
         }
 
         private void Tema_Chiaro(object sender, RoutedEventArgs e) {
@@ -180,40 +184,77 @@ namespace PortScanner {
         /// </summary>
         private void Scan_Scansione() {
             porteTotali = rangePortMax - rangePortMin + 1;
-
             porteScansionate = 0;
             porteAperte = 0;
             int porteApertePrecedente = 0;
             scansioneAttiva = true;
-
             Stopwatch durataScansione = new();
             durataScansione.Start();
-
             dataScansione = DateTime.Now;
-            for (int currentPortNum = rangePortMin; currentPortNum <= rangePortMax; currentPortNum++) {
-                TCP_Socket socket;
-                try {
-                    socket = new(targetIPAddress, currentPortNum);
-                    porteScansionate++;
+            double progressoScansione = 0;
+            Dispatcher.Invoke(() => {
+                cmbTipoScansione.IsEnabled = false;
+                prbProgressoScan.Value = progressoScansione;
+            });
 
-                    progressoScansione = (double)porteScansionate / porteTotali * 100;
-                    if (porteScansionate % intervalloAggiornamentoProgressBar == 0 ||
-                        porteScansionate == porteTotali) {
-                        Dispatcher.Invoke(() => {
-                            prbProgressoScan.Value = progressoScansione;
-                        });
+            for (int currentPortNum = rangePortMin; currentPortNum <= rangePortMax; currentPortNum++) {
+                Base_Socket socket;
+                string porteApertePrecedente_s = porteApertePrecedente.ToString();
+                try {
+                    if (tipoScansione == OpzioniTipoScansione.TCP) {
+                        socket = new TCP_Socket(targetIPAddress, currentPortNum);
+                    } else {
+                        socket = new UDP_Socket(targetIPAddress, currentPortNum);
                     }
 
                     socket.Connect(timeoutScansione);
                     if (socket.IsOpen) {
                         porteAperte++;
                     }
-                } catch (Exception ex) {
-                    Debug.WriteLine(ex.Message);
-                    Debug.WriteLine(ex);
+
+                    Dispatcher.BeginInvoke(() => {
+                        listaSockets.Add(socket);
+                        txtPorteAperte.Text = txtPorteAperte.Text.Replace(porteApertePrecedente_s, porteAperte.ToString());
+                    });
+
+                    if (socket.IsOpen) {
+                        porteApertePrecedente++;
+                    }
+
+                    porteScansionate++;
+                    progressoScansione = (double)porteScansionate / porteTotali * 100;
+                    if (porteScansionate % INTERVALLO_AGGIORNAMENTO_PROGRESSBAR == 0 ||
+                        porteScansionate == porteTotali) {
+                        Dispatcher.Invoke(() => {
+                            prbProgressoScan.Value = progressoScansione;
+                        });
+                    }
+                } catch (NotImplementedException e) {
+                    Debug.WriteLine(e.Message);
+                    Debug.WriteLine(e);
+                    scansioneAttiva = false;
                     durataScansione.Stop();
                     durataScansione_l = durataScansione.ElapsedMilliseconds;
                     Dispatcher.Invoke(() => {
+                        cmbTipoScansione.IsEnabled = true;
+                        prbProgressoScan.Value = progressoScansione;
+                        txtDurata.Text = txtDurata.Text.Replace("0", durataScansione_l.ToString());
+                        txtPorteAperte.Text = txtPorteAperte.Text.Replace("0", porteAperte.ToString());
+                        txtPorteScansionate.Text = txtPorteScansionate.Text.Replace("0", porteScansionate.ToString());
+                    });
+                    MessageBox.Show("Attenzione: Scansione UDP non ancora implementata, cambiare modalità di scansione!",
+                                    "Warning",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Warning);
+                    return;
+                } catch (Exception ex) {
+                    Debug.WriteLine(ex.Message);
+                    Debug.WriteLine(ex);
+                    scansioneAttiva = false;
+                    durataScansione.Stop();
+                    durataScansione_l = durataScansione.ElapsedMilliseconds;
+                    Dispatcher.Invoke(() => {
+                        cmbTipoScansione.IsEnabled = true;
                         prbProgressoScan.Value = progressoScansione;
                         txtDurata.Text = txtDurata.Text.Replace("0", durataScansione_l.ToString());
                         txtPorteAperte.Text = txtPorteAperte.Text.Replace("0", porteAperte.ToString());
@@ -234,6 +275,7 @@ namespace PortScanner {
                     durataScansione_l = durataScansione.ElapsedMilliseconds;
 
                     Dispatcher.Invoke(() => {
+                        cmbTipoScansione.IsEnabled = true;
                         prbProgressoScan.Value = progressoScansione;
                         txtDurata.Text = txtDurata.Text.Replace("0", durataScansione_l.ToString());
                         txtPorteAperte.Text = txtPorteAperte.Text.Replace("0", porteAperte.ToString());
@@ -241,21 +283,11 @@ namespace PortScanner {
                     });
                     return;
                 }
-
-                Dispatcher.BeginInvoke(() => {
-                    listaSockets.Add(socket);
-                    if (porteAperte != porteApertePrecedente) {
-                        txtPorteAperte.Text = txtPorteAperte.Text.Replace(porteApertePrecedente.ToString(), porteAperte.ToString());
-                    }
-                });
-
-                if (socket.IsOpen) {
-                    porteApertePrecedente++;
-                }
             }
             durataScansione.Stop();
             durataScansione_l = durataScansione.ElapsedMilliseconds;
             Dispatcher.Invoke(() => {
+                cmbTipoScansione.IsEnabled = true;
                 txtDurata.Text = txtDurata.Text.Replace("0", durataScansione_l.ToString());
                 txtPorteAperte.Text = txtPorteAperte.Text.Replace("0", porteAperte.ToString());
                 txtPorteScansionate.Text = txtPorteScansionate.Text.Replace("0", porteScansionate.ToString());
@@ -304,8 +336,8 @@ namespace PortScanner {
                 }
             }
 
-            if (!TCP_Socket.CheckValidPort(txtPortMin.Text)) {
-                MessageBox.Show($"Attenzione: Inserire un numero di porta maggiore o uguale a {TCP_Socket.PrimaPorta}!",
+            if (!Base_Socket.CheckValidPort(txtPortMin.Text)) {
+                MessageBox.Show($"Attenzione: Inserire un numero di porta maggiore o uguale a {Base_Socket.PRIMA_PORTA}!",
                                 "Attenzione",
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Warning);
@@ -315,8 +347,8 @@ namespace PortScanner {
             }
             rangePortMin = int.Parse(txtPortMin.Text);
 
-            if (!TCP_Socket.CheckValidPort(txtPortMax.Text)) {
-                MessageBox.Show($"Attenzione: Inserire un numero di porta minore o uguale a {TCP_Socket.UltimaPorta}!",
+            if (!Base_Socket.CheckValidPort(txtPortMax.Text)) {
+                MessageBox.Show($"Attenzione: Inserire un numero di porta minore o uguale a {Base_Socket.ULTIMA_PORTA}!",
                                 "Attenzione",
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Warning);
@@ -435,14 +467,14 @@ namespace PortScanner {
             try {
                 using StreamWriter writer = new(filePath);
                 for (int i = 0; i < dtgScansioni.Items.Count; i++) {
-                    var socket = dtgScansioni.Items[i] as TCP_Socket;
+                    var socket = dtgScansioni.Items[i] as Base_Socket;
                     if (i == 0) {
                         writer.WriteLine($"Scansione avviata: [{dataScansione.ToString("dd/MM/yyyy HH:mm:ss")}]");
                         writer.WriteLine($"Durata della scansione: [{durataScansione_l}]ms");
                         writer.WriteLine($"Target: {socket.IPAddress?.ToString()}");
                         writer.WriteLine($"Stato della porta{separatoreCSV}Numero della porta{separatoreCSV}Servizio rilevato");
                     }
-                    writer.WriteLine(TCP_Socket.ToCSV(socket, separatoreCSV));
+                    writer.WriteLine(Base_Socket.ToCSV(socket, separatoreCSV));
                 }
             } catch (Exception ex) {
                 Debug.WriteLine(ex);
@@ -482,16 +514,16 @@ namespace PortScanner {
             }
 
             try {
-                List<TCP_Socket> listaJSON = new();
-                foreach (TCP_Socket item in dtgScansioni.Items) {
-                    listaJSON.Add(item);
+                List<Base_Socket> listaJSON = new();
+                foreach (Base_Socket item in dtgScansioni.Items) {
+                    listaJSON.Add((Base_Socket)item);
                 }
                 var listaJson = listaJSON.Select(socket => new {
                     IPAddress = socket.IPAddress?.ToString(),
                     NumeroPorta = socket.NumeroPorta,
                     Stato = socket.Stato.ToString(),
-                    Servizio = TCP_Socket.ServiziConosciuti.ContainsKey(socket.NumeroPorta)
-                                ? TCP_Socket.ServiziConosciuti[socket.NumeroPorta]
+                    Servizio = Base_Socket.ServiziConosciuti.ContainsKey(socket.NumeroPorta)
+                                ? Base_Socket.ServiziConosciuti[socket.NumeroPorta]
                                 : "Sconosciuto"
                 });
 
@@ -526,36 +558,36 @@ namespace PortScanner {
                     dtgScansioni.ItemsSource = listaSockets;
                     break;
                 case OpzioniFiltri.PorteAperte:
-                    ObservableCollection<TCP_Socket> listaPorteAperte = new();
-                    foreach (TCP_Socket socket in listaSockets) {
-                        if (socket.Stato == TCP_Socket.StatoPorta.Aperta) {
+                    ObservableCollection<Base_Socket> listaPorteAperte = new();
+                    foreach (Base_Socket socket in listaSockets) {
+                        if (socket.Stato == Base_Socket.StatoPorta.Aperta) {
                             listaPorteAperte.Add(socket);
                         }
                     }
                     dtgScansioni.ItemsSource = listaPorteAperte;
                     break;
                 case OpzioniFiltri.PorteChiuse:
-                    ObservableCollection<TCP_Socket> listaPorteChiuse = new();
-                    foreach (TCP_Socket socket in listaSockets) {
-                        if (socket.Stato == TCP_Socket.StatoPorta.Chiusa) {
+                    ObservableCollection<Base_Socket> listaPorteChiuse = new();
+                    foreach (Base_Socket socket in listaSockets) {
+                        if (socket.Stato == Base_Socket.StatoPorta.Chiusa) {
                             listaPorteChiuse.Add(socket);
                         }
                     }
                     dtgScansioni.ItemsSource = listaPorteChiuse;
                     break;
                 case OpzioniFiltri.PorteFiltrate:
-                    ObservableCollection<TCP_Socket> listaPorteFiltrate = new();
-                    foreach (TCP_Socket socket in listaSockets) {
-                        if (socket.Stato == TCP_Socket.StatoPorta.Filtrata) {
+                    ObservableCollection<Base_Socket> listaPorteFiltrate = new();
+                    foreach (Base_Socket socket in listaSockets) {
+                        if (socket.Stato == Base_Socket.StatoPorta.Filtrata) {
                             listaPorteFiltrate.Add(socket);
                         }
                     }
                     dtgScansioni.ItemsSource = listaPorteFiltrate;
                     break;
                 case OpzioniFiltri.ServiziRilevati:
-                    ObservableCollection<TCP_Socket> listaServiziRilevati = new();
-                    foreach (TCP_Socket socket in listaSockets) {
-                        if (TCP_Socket.ServiziConosciuti.ContainsKey(socket.NumeroPorta)) {
+                    ObservableCollection<Base_Socket> listaServiziRilevati = new();
+                    foreach (Base_Socket socket in listaSockets) {
+                        if (Base_Socket.ServiziConosciuti.ContainsKey(socket.NumeroPorta)) {
                             listaServiziRilevati.Add(socket);
                         }
                     }
@@ -581,33 +613,31 @@ namespace PortScanner {
             }
             dtgScansioni.ItemsSource = listaSockets;
         }
+        private void OpzioniScansione_TipoScansione(object sender, SelectionChangedEventArgs e) {
+            switch ((OpzioniTipoScansione)cmbTipoScansione.SelectedIndex) {
+                case OpzioniTipoScansione.TCP:
+                    tipoScansione = OpzioniTipoScansione.TCP;
+                    break;
+                case OpzioniTipoScansione.UDP:
+                    tipoScansione = OpzioniTipoScansione.UDP;
+                    break;
+            }
+        }
         private void OpzioniScansione_MouseWheel(object sender, MouseWheelEventArgs e) {
             e.Handled = true;
         }
 
         private void FAQ_PortScanner(object sender, RoutedEventArgs e) {
-            MessageBox.Show("Un port scanner è uno strumento usato in informatica e networking per analizzare le porte di rete di un dispositivo (come un computer o un server) per vedere quali sono aperte, chiuse o filtrate.",
-                            "INFO",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Information);
+            FAQ.ShowWindow(FAQ.INFO_PORTSCANNER);
         }
         private void FAQ_Sirius(object sender, RoutedEventArgs e) {
-            MessageBox.Show("Sirius è stata fondata nel 2000 come risultato della collaborazione tra l'incubatore di imprese del Politecnico di Torino e un team di esperti con l'obiettivo di sviluppare sistemi software avanzati per la gestione delle centrali elettriche e la trasmissione di energia.\r\n\r\nI membri fondatori di Sirius avevano già accumulato una notevole esperienza nel settore dell'automazione energetica sin dall'inizio degli anni '90, lavorando a stretto contatto con aziende rinomate del settore. \r\nQuesta competenza collettiva ha costituito la base per la crescita e il successo dell'azienda.\r\n\r\nNel corso degli anni, Sirius ha fornito con successo soluzioni a importanti operatori del mercato elettrotecnico. Dal 2006 abbiamo integrato le nostre soluzioni nei prodotti VireoX, sofisticati sistemi di gestione progettati specificamente per l'analisi e il controllo remoto degli impianti di energia rinnovabile.",
-                            "INFO",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Information);
+            FAQ.ShowWindow(FAQ.INFO_SIRIUS);
         }
         private void FAQ_Funzionamento(object sender, RoutedEventArgs e) {
-            MessageBox.Show("Uno scanner di porte controlla lo stato delle porte di un dispositivo in rete inviando richieste a diverse porte di un indirizzo IP. In base alla risposta ricevuta può determinare se una porta è aperta (servizio attivo), chiusa (nessun servizio) o filtrata (bloccata da firewall o sistemi di sicurezza).",
-                            "INFO",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Information);
+            FAQ.ShowWindow(FAQ.FUNZIONAMENTO_PORTSCANNER);
         }
         private void FAQ_Legale(object sender, RoutedEventArgs e) {
-            MessageBox.Show("L'uso di un port scanner è generalmente legale per analizzare la propria rete, effettuare test autorizzati o per scopi di studio. Tuttavia, scansionare sistemi senza autorizzazione può essere considerato attività sospetta o illegale in alcuni paesi. Utilizza sempre questi strumenti in modo responsabile.",
-                            "INFO",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Information);
+            FAQ.ShowWindow(FAQ.LEGAL_PORTSCANNER);
         }
     }
 }
