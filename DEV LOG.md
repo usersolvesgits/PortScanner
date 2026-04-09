@@ -3,20 +3,20 @@
 ## Introduzione
 Questo documento riporta il progresso dello sviluppo del progetto.  
 
-### Disclaimer
-La struttura del progetto è stata pensata per la maggiore scalabilità possibile, per questo potrebbe sembrare esagerata.
-
 ---
 
 ## Informazioni sul progetto
 **Progetto**: Port Scanner  
 **Sviluppatore**: Francesco Bianchini  
-**Tecnologie utilizzate**: .NET Framework / WPF  
+**Tecnologie utilizzate**: .NET Framework 9.0 / WPF  
 **Data di inizio (dd/MM/yyyy)**: 06/03/2026  
 
 ---
 
 ## Log di sviluppo
+
+<details id="log">
+<summary>Premi qui per espandere la cronologia dello sviluppo del progetto</summary>
 
 ### [06/03/2026]
 **Attività svolte**
@@ -341,3 +341,47 @@ FAQ:
 
 **Problemi riscontrati**
 - 1) Se si prova ad impostare dei filtri e delle impostazioni di ordinamento allo stesso tempo, la prima opzione impostata verrà oscurata dalle seguenti.
+
+---
+
+### [09/04/2026]
+**Attività svolte**
+- Aggiornamenti UI
+- Aggiornamenti backend
+- Aggiornamenti Base_Socket
+- Aggiornamenti FAQ
+- Aggiornamenti DEV LOG
+
+UI:
+- Aggiunto un margine tra il testo *"Progresso della scansione:"* e la *ProgressBar*.
+
+Backend:
+- Rimossa la finestra di messaggio di errore per la scansione JSON se non si selezionava un percorso file valido.
+- Quando si avvia la scansione adesso i filtri e l'ordinamento delle sockets vengono resettati.
+- Rimosso l'aggiornamento in tempo reale della visualizzazione delle porte aperte durante la scansione.
+- Aggiunta logica per il cambio di colore della *ProgressBar*.
+
+Base_Socket:
+- Cambiato il controllo sulla proprietà sulla proprietà *NumeroPorta*.
+- Modificato il metodo *ToJSON(Base_Socket socket)* ed aggiunto un overload per la visualizzazione dell'indirizzo IP del destinatario *ToJSON(Base_Socket socket, bool showIPAddress)*.
+
+FAQ:
+- Aggiunta documentazione.
+
+DEV LOG:
+- Aggiunta opzione di un menù a tendina per nascondere o mostrare i log di sviluppo del progetto.
+
+**Minor Fixes**
+- Rimossa la sezione *"TODOS"* da *MainWindow.xaml.cs*.
+- Cambiata la modalità dei namespaces dei singoli file (da namespace a "blocco" a quelli di intero file).
+- Cambiato il nome della lista delle socket della scansione (da *listaSockets* a *socketsScansionate*).
+- Aggiunto il titolo alla schermata di salvataggio file JSON.
+- Cambiato il testo della *MessageBox* di errore in caso di eccezione durante la scansione.
+
+---
+
+<p><a href="#log">Premi qui</a> per tornare all'inizio del log di sviluppo.</p>
+
+---
+
+</details>
