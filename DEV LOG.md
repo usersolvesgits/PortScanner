@@ -380,6 +380,29 @@ DEV LOG:
 
 ---
 
+### [12/04/2026]
+**Attività svolte**
+- Aggiornamenti UI
+- Aggiornamenti backend
+- Aggiunto file TODOS.md
+- Aggiunta icona
+
+UI:
+- Reso il background della *ProgressBar* trasparente.
+- Aggiunto il numero di versione dell'applicazione al titolo.
+- Aggiunta nuova opzione per selezionare nuovo tipo di ordinamento.
+- Aggiunta ed impostata nuova icona del progetto "*radar.ico*".
+
+Backend:
+- Creata una stringa costante *VERSIONE_APPLICAZIONE* per tenere conto della versione del progetto, da modificare manualmente ogni volta che si cambia qualcosa.
+- Aggiornata la logica di ordinamento e filtraggio di porte per lavorare in contemporanea.
+- Aggiunta nuova opzione di ordinamento *PorteDecrescente* nell'enum *OpzioniOrdinamenti*.
+
+TODOS.md:
+- Creato il file *TODOS.md* per tenere traccia delle funzionalità da implementare nel progetto.
+
+---
+
 <p><a href="#log">Premi qui</a> per tornare all'inizio del log di sviluppo.</p>
 
 ---

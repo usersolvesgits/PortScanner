@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
@@ -83,7 +82,7 @@ public abstract class Base_Socket {
         { 9418, "Git" },
         { 9999, "Debug/Dev" },
         { 27017, "MongoDB" }
-        };
+    };
 
     /// <summary>
     /// Indica l'hostname del destinatario.
@@ -102,7 +101,8 @@ public abstract class Base_Socket {
         get { return _numPorta; }
         protected set {
             if (value < PRIMA_PORTA || value > ULTIMA_PORTA) {
-                throw new ArgumentOutOfRangeException(nameof(value), $"Il valore inserito deve essere un numero compreso tra {PRIMA_PORTA} e {ULTIMA_PORTA}!");
+                throw new ArgumentOutOfRangeException(nameof(value),
+                                                      $"Il valore inserito deve essere un numero compreso tra {PRIMA_PORTA} e {ULTIMA_PORTA}!");
             } else {
                 if (ServiziConosciuti.TryGetValue(value, out string Servizio)) {
                     this.Servizio = Servizio;
@@ -315,7 +315,7 @@ public abstract class Base_Socket {
                                 : "Sconosciuto"
         };
 
-        return JsonSerializer.Serialize(JSONSocket, new JsonSerializerOptions { 
+        return JsonSerializer.Serialize(JSONSocket, new JsonSerializerOptions {
             WriteIndented = true
         });
     }

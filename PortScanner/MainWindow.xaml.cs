@@ -16,14 +16,20 @@ using System.Windows.Media;
 namespace PortScanner;
 
 public partial class MainWindow : Window {
+    const string VERSIONE_APPLICAZIONE = "1.0.0";
     const string URL_SVILUPPATORE = "https://github.com/usersolvesgits";
     const string URL_AZIENDA = "https://www.sirius.to.it/";
     const int INTERVALLO_AGGIORNAMENTO_PROGRESSBAR = 2;
 
     /// <summary>
-    /// <see cref="ObservableCollection{T}"/> usata per contenere tutte le sockets scansionate.
+    /// <see cref="ObservableCollection{T}"/> usata per contenere tutte le sockets scansionate.<br/>
+    /// Fa da base ad <see cref="socketVisualizzate"/>.
     /// </summary>
     ObservableCollection<Base_Socket> socketsScansionate = new();
+    /// <summary>
+    /// Lista usata per l'aggiornamento dell'interfaccia utente, basata sulle sockets contenute in <see cref="socketsScansionate"/>.
+    /// </summary>
+    ObservableCollection<Base_Socket> socketVisualizzate = new();
     DateTime tempoScansione;
     IPAddress targetIPAddress;
     enum OpzioniFiltri {
@@ -35,13 +41,16 @@ public partial class MainWindow : Window {
     }
     enum OpzioniOrdinamenti {
         Nessuno,
+        PorteDecrescenti,
         AperteFiltrateChiuse,
         ChiuseFiltrateAperte
     }
+    OpzioniOrdinamenti ordinamentoScansione = OpzioniOrdinamenti.Nessuno;
     enum OpzioniTipoScansione {
         TCP,
         UDP
     }
+    OpzioniTipoScansione tipoScansione = OpzioniTipoScansione.TCP;
     int rangePortMin,
         rangePortMax;
     int porteTotali = 0,
@@ -51,13 +60,13 @@ public partial class MainWindow : Window {
     bool scansioneAttiva = false,
          richiestaFermataScansione = false;
     int timeoutScansione;
-    OpzioniTipoScansione tipoScansione = OpzioniTipoScansione.TCP;
 
     public MainWindow() {
         InitializeComponent();
-        dtgScansioni.ItemsSource = socketsScansionate;
+        dtgScansioni.ItemsSource = socketVisualizzate;
         txtIPAddress.Focus();
         txtIPAddress.CaretIndex = txtIPAddress.Text.Length;
+        Title = $"PortScanner - {VERSIONE_APPLICAZIONE}";
     }
 
     /// <summary>
@@ -205,6 +214,7 @@ public partial class MainWindow : Window {
 
                 Dispatcher.BeginInvoke(() => {
                     socketsScansionate.Add(socket);
+                    socketVisualizzate.Add(socket);
                 });
 
                 porteScansionate++;
@@ -299,6 +309,7 @@ public partial class MainWindow : Window {
     }
     private void Scan_AvviaScansione(object sender, RoutedEventArgs e) {
         socketsScansionate.Clear();
+        socketVisualizzate.Clear();
 
         Dispatcher.Invoke(() => {
             prbProgressoScan.Value = 0;
@@ -556,16 +567,18 @@ public partial class MainWindow : Window {
 
         switch ((OpzioniFiltri)cmbFiltri.SelectedIndex) {
             case OpzioniFiltri.Nessuno:
-                    dtgScansioni.ItemsSource = socketsScansionate;
+                socketVisualizzate = new(socketsScansionate);
+                CambioOrdinamento(ordinamentoScansione);
                 break;
             case OpzioniFiltri.PorteAperte:
                 ObservableCollection<Base_Socket> listaPorteAperte = new();
                 foreach (Base_Socket socket in socketsScansionate) {
-                    if (socket.Stato == Base_Socket.StatoPorta.Aperta) {
+                    if (socket.IsOpen) {
                         listaPorteAperte.Add(socket);
                     }
                 }
-                dtgScansioni.ItemsSource = listaPorteAperte;
+                socketVisualizzate = new(listaPorteAperte);
+                CambioOrdinamento(ordinamentoScansione);
                 break;
             case OpzioniFiltri.PorteChiuse:
                 ObservableCollection<Base_Socket> listaPorteChiuse = new();
@@ -574,7 +587,8 @@ public partial class MainWindow : Window {
                         listaPorteChiuse.Add(socket);
                     }
                 }
-                dtgScansioni.ItemsSource = listaPorteChiuse;
+                socketVisualizzate = new(listaPorteChiuse);
+                CambioOrdinamento(ordinamentoScansione);
                 break;
             case OpzioniFiltri.PorteFiltrate:
                 ObservableCollection<Base_Socket> listaPorteFiltrate = new();
@@ -583,7 +597,8 @@ public partial class MainWindow : Window {
                         listaPorteFiltrate.Add(socket);
                     }
                 }
-                dtgScansioni.ItemsSource = listaPorteFiltrate;
+                socketVisualizzate = new(listaPorteFiltrate);
+                CambioOrdinamento(ordinamentoScansione);
                 break;
             case OpzioniFiltri.ServiziRilevati:
                 ObservableCollection<Base_Socket> listaServiziRilevati = new();
@@ -592,7 +607,29 @@ public partial class MainWindow : Window {
                         listaServiziRilevati.Add(socket);
                     }
                 }
-                dtgScansioni.ItemsSource = listaServiziRilevati;
+                socketVisualizzate = new(listaServiziRilevati);
+                CambioOrdinamento(ordinamentoScansione);
+                break;
+        }
+        dtgScansioni.ItemsSource = socketVisualizzate;
+    }
+    /// <summary>
+    /// Metodo utilizzato per cambiare l'ordinamento dell'<see cref="ObservableCollection{Base_Socket}"/> <see cref="socketVisualizzate"/>.
+    /// </summary>
+    /// <param name="opzioniOrdinamenti">Parametro di tipo <see cref="OpzioniOrdinamenti"/> usato per decretare il tipo di ordinamento da eseguire.</param>
+    private void CambioOrdinamento(OpzioniOrdinamenti opzioniOrdinamenti) {
+        switch (opzioniOrdinamenti) {
+            case OpzioniOrdinamenti.Nessuno:
+                socketVisualizzate = new(socketVisualizzate.OrderBy(socket => socket.NumeroPorta));
+                break;
+            case OpzioniOrdinamenti.PorteDecrescenti:
+                socketVisualizzate = new(socketVisualizzate.OrderByDescending(socket => socket.NumeroPorta));
+                break;
+            case OpzioniOrdinamenti.AperteFiltrateChiuse:
+                socketVisualizzate = new(socketVisualizzate.OrderBy(socket => socket.Stato));
+                break;
+            case OpzioniOrdinamenti.ChiuseFiltrateAperte:
+                socketVisualizzate = new(socketVisualizzate.OrderByDescending(socket => socket.Stato));
                 break;
         }
     }
@@ -601,18 +638,11 @@ public partial class MainWindow : Window {
             return;
         }
 
-        switch ((OpzioniOrdinamenti)cmbOrdina.SelectedIndex) {
-            case OpzioniOrdinamenti.Nessuno:
-                socketsScansionate = new(socketsScansionate.OrderBy(socket => socket.NumeroPorta));
-                break;
-            case OpzioniOrdinamenti.AperteFiltrateChiuse:
-                socketsScansionate = new(socketsScansionate.OrderBy(socket => socket.Stato));
-                break;
-            case OpzioniOrdinamenti.ChiuseFiltrateAperte:
-                socketsScansionate = new(socketsScansionate.OrderByDescending(socket => socket.Stato));
-                break;
-        }
-        dtgScansioni.ItemsSource = socketsScansionate;
+        ordinamentoScansione = (OpzioniOrdinamenti)cmbOrdina.SelectedIndex;
+
+        CambioOrdinamento(ordinamentoScansione);
+
+        dtgScansioni.ItemsSource = socketVisualizzate;
     }
     private void OpzioniScansione_TipoScansione(object sender, SelectionChangedEventArgs e) {
         switch ((OpzioniTipoScansione)cmbTipoScansione.SelectedIndex) {
