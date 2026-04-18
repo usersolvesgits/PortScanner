@@ -16,19 +16,22 @@ using System.Windows.Media;
 namespace PortScanner;
 
 public partial class MainWindow : Window {
-    const string VERSIONE_APPLICAZIONE = "1.0.0";
+    const string VERSIONE_APPLICAZIONE = "1.1.0";
+    const string STATO_APPLICAZIONE = "Ongoing";
     const string URL_SVILUPPATORE = "https://github.com/usersolvesgits";
     const string URL_AZIENDA = "https://www.sirius.to.it/";
     const int INTERVALLO_AGGIORNAMENTO_PROGRESSBAR = 2;
 
     /// <summary>
-    /// <see cref="ObservableCollection{T}"/> usata per contenere tutte le sockets scansionate.<br/>
-    /// Fa da base ad <see cref="socketVisualizzate"/>.
+    /// <see cref="ObservableCollection{T}"/> usata per contenere tutte le sockets scansionate.
     /// </summary>
     ObservableCollection<Base_Socket> socketsScansionate = new();
     /// <summary>
-    /// Lista usata per l'aggiornamento dell'interfaccia utente, basata sulle sockets contenute in <see cref="socketsScansionate"/>.
+    /// Lista usata per l'aggiornamento dell'interfaccia utente.
     /// </summary>
+    /// <remarks>
+    /// Basata sulle sockets contenute in <see cref="socketsScansionate"/>.
+    /// </remarks>
     ObservableCollection<Base_Socket> socketVisualizzate = new();
     DateTime tempoScansione;
     IPAddress targetIPAddress;
@@ -73,6 +76,9 @@ public partial class MainWindow : Window {
     /// Apre l'url in input sul browser di default dell'utente.
     /// </summary>
     /// <param name="url">Indirizzo da aprire.</param>
+    /// <remarks>
+    /// Il suo comportamento potrebbe variare da dispositivo a dispositivo (Unix != Windows).
+    /// </remarks>
     public static void OpenLink(string url) {
         try {
             Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
@@ -119,6 +125,10 @@ public partial class MainWindow : Window {
                     Scan_FermaScansione(null, null);
                     e.Handled = true;
                     break;
+                case Key.I:
+                    PortScanner_Informazioni(null, null);
+                    e.Handled = true;
+                    break;
             }
         }
         if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Alt)) {
@@ -145,6 +155,74 @@ public partial class MainWindow : Window {
                     break;
             }
         }
+    }
+    /// <summary>
+    /// Calcola e restituisce le statistiche relative all'ultima scansione effettuata.
+    /// </summary>
+    /// <param name="tempo">
+    /// Data e ora di avvio della scansione.
+    /// </param>
+    /// <param name="indirizzoTarget">
+    /// Indirizzo IP del target.
+    /// </param>
+    /// <param name="porteTOT">
+    /// Numero totale di porte analizzate.
+    /// </param>
+    /// <param name="porteOpen">
+    /// Numero di porte risultate aperte.
+    /// </param>
+    /// <param name="porteClosed">
+    /// Numero di porte risultate chiuse.
+    /// </param>
+    /// <param name="porteFiltered">
+    /// Numero di porte risultate filtrate.
+    /// </param>
+    /// <param name="durata">
+    /// Durata complessiva della scansione in millisecondi.
+    /// </param>
+    private void PortScanner_GetStatistiche(ref DateTime tempo, ref IPAddress indirizzoTarget,
+                                            ref int porteTOT, ref int porteOpen, ref int porteClosed, ref int porteFiltered,
+                                            ref long durata) {
+        if (socketsScansionate.Count == 0) {
+            return;
+        }
+
+        porteTOT = socketsScansionate.Count;
+        durata = durataScansione_l;
+
+        foreach (Base_Socket socket in socketsScansionate) {
+            switch (socket.Stato) {
+                case Base_Socket.StatoPorta.Aperta:
+                    porteOpen++;
+                    break;
+                case Base_Socket.StatoPorta.Chiusa:
+                    porteClosed++;
+                    break;
+                case Base_Socket.StatoPorta.Filtrata:
+                    porteFiltered++;
+                    break;
+            }
+        }
+
+        tempo = tempoScansione;
+        indirizzoTarget = targetIPAddress;
+    }
+    private void PortScanner_Informazioni(object sender, RoutedEventArgs e) {
+        int porteTOT = -1,
+            porteOpen = -1,
+            porteClosed = -1,
+            porteFiltered = -1;
+        long durata = -1;
+        DateTime tempo = DateTime.MinValue;
+        IPAddress indirizzoTarget = null;
+        PortScanner_GetStatistiche(ref tempo, ref indirizzoTarget, ref porteTOT, ref porteOpen, ref porteClosed, ref porteFiltered, ref durata);
+
+        InformationWindow finestraInfo = new(VERSIONE_APPLICAZIONE, STATO_APPLICAZIONE,
+                                             tempo, durata, indirizzoTarget,
+                                             porteTOT, porteOpen, porteClosed, porteFiltered,
+                                             mainWindow);
+        finestraInfo.CreaFinestra();
+        finestraInfo.Show();
     }
 
     private void Esci(object sender, RoutedEventArgs e) {
@@ -333,7 +411,7 @@ public partial class MainWindow : Window {
         if (!check) {
             try {
                 targetIPAddress = Dns.GetHostAddresses(target)
-                                     .FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork);
+                                     .FirstOrDefault(indirizzo => indirizzo.AddressFamily == AddressFamily.InterNetwork);
                 if (targetIPAddress is null) {
                     MessageBox.Show("Errore: Impossibile trovare un indirizzo IP valido per l'hostname dato!",
                                 "Errore",
@@ -541,7 +619,7 @@ public partial class MainWindow : Window {
 
             var testoEsportazione = new {
                 DataScansione = tempoScansione.ToString("dd/MM/yyyy HH:mm:ss"),
-                DurataMs = durataScansione_l,
+                Durata = $"{durataScansione_l} ms",
                 Target = targetIPAddress?.ToString(),
                 Risultati = listaRisultatiJSON
             };

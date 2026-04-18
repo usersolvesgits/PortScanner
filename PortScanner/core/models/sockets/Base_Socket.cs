@@ -194,7 +194,7 @@ public abstract class Base_Socket {
 
     /// <summary>
     /// Verifica se la stringa fornita rappresenta una porta valida.
-    /// La porta deve essere un numero compreso tra <see cref="PrimaPorta"/> e <see cref="UltimaPorta"/>.
+    /// La porta deve essere un numero compreso tra <see cref="PRIMA_PORTA"/> e <see cref="ULTIMA_PORTA"/>.
     /// </summary>
     /// <param name="port">
     /// Stringa che rappresenta il numero di porta da controllare.
@@ -217,6 +217,25 @@ public abstract class Base_Socket {
         }
 
         if (portInt < PRIMA_PORTA || portInt > ULTIMA_PORTA) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Verifica se l'intero fornito rappresenta una porta valida.
+    /// La porta deve essere un numero compreso tra <see cref="PRIMA_PORTA"/> e <see cref="ULTIMA_PORTA"/>.
+    /// </summary>
+    /// <param name="port">
+    /// Intero che rappresenta il numero di porta da controllare.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> se la porta è numerica e rientra nell'intervallo valido delle porte TCP/UDP;
+    /// <see langword="false"/> se la stringa è vuota, non numerica o fuori dall'intervallo consentito.
+    /// </returns>
+    public static bool CheckValidPort(int port) {
+        if (port < PRIMA_PORTA || port > ULTIMA_PORTA) {
             return false;
         }
 

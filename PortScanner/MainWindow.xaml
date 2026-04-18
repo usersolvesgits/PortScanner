@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PortScanner"
         mc:Ignorable="d"
-        Icon="/core/assets/icons/radar.ico"
+        Name="mainWindow"
+        Icon="/core/assets/application_icons/radar.ico"
         WindowStartupLocation="CenterScreen"
         Height="500" Width="1100" MinHeight="500" MinWidth="800"
         PreviewKeyDown="PortScanner_ShortCuts">
@@ -28,6 +29,7 @@
                 <MenuItem Header="Esci" Click="Esci" InputGestureText="Ctrl + Q"/>
             </MenuItem>
             <MenuItem Header="Visualizza">
+                <MenuItem Header="Informazioni" Click="PortScanner_Informazioni" InputGestureText="Ctrl + I"/>
                 <MenuItem Header="Temi">
                     <MenuItem Header="Tema Chiaro" Click="Tema_Chiaro" InputGestureText="Ctrl + Alt + L"/>
                     <MenuItem Header="Tema Scuro" Click="Tema_Scuro" InputGestureText="Ctrl + Alt + D"/>
@@ -91,7 +93,7 @@
 
                         <TextBlock Text="Filtri / Ordinamento" FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
                         <TextBlock Text="Filtra per:"/>
-                        <ComboBox Name="cmbFiltri" Margin="0,0,0,5" 
+                        <ComboBox Name="cmbFiltri" Margin="0,0,0,5"
                                   SelectionChanged="OpzioniScansione_CambioFiltro" PreviewMouseWheel="OpzioniScansione_MouseWheel">
                             <ComboBoxItem Content="Nessun Filtro" IsSelected="True"/>
                             <ComboBoxItem Content="Porte Aperte"/>
@@ -137,22 +139,25 @@
                             <DataGridTemplateColumn Header="Stato (Icona)" Width="*">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Ellipse Width="20" Height="20" x:Name="ellipse"/>
+                                        <Image Width="20" Height="20" Name="Icona"/>
                                         <DataTemplate.Triggers>
                                             <DataTrigger Binding="{Binding Stato}" Value="Aperta">
-                                                <Setter TargetName="ellipse" Property="Fill" Value="Green"/>
+                                                <Setter TargetName="Icona" Property="Source"
+                                                        Value="pack://application:,,,/core/assets/socket_status_icons/aperte.png"/>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding Stato}" Value="Chiusa">
-                                                <Setter TargetName="ellipse" Property="Fill" Value="Red"/>
+                                                <Setter TargetName="Icona" Property="Source"
+                                                        Value="pack://application:,,,/core/assets/socket_status_icons/chiuse.png"/>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding Stato}" Value="Filtrata">
-                                                <Setter TargetName="ellipse" Property="Fill" Value="Blue"/>
+                                                <Setter TargetName="Icona" Property="Source" 
+                                                        Value="pack://application:,,,/core/assets/socket_status_icons/filtrate.png"/>
                                             </DataTrigger>
                                         </DataTemplate.Triggers>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Stato (Icona)" Width="*">
+                            <DataGridTemplateColumn Header="Stato" Width="*">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Stato}"/>

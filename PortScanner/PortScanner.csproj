@@ -9,17 +9,23 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="core\assets\icons\lente_ingrandimento.ico" />
-    <None Remove="core\assets\icons\lente_ingrandimento.png" />
-    <None Remove="core\assets\icons\radar.ico" />
-    <None Remove="core\assets\icons\radar2.ico" />
-    <None Remove="core\assets\icons\windmill.ico" />
+    <None Remove="core\assets\application_icons\lente_ingrandimento.ico" />
+    <None Remove="core\assets\application_icons\lente_ingrandimento.png" />
+    <None Remove="core\assets\application_icons\radar.ico" />
+    <None Remove="core\assets\application_icons\radar2.ico" />
+    <None Remove="core\assets\application_icons\windmill.ico" />
+    <None Remove="core\assets\socket_status_icons\aperte.png" />
+    <None Remove="core\assets\socket_status_icons\chiuse.png" />
+    <None Remove="core\assets\socket_status_icons\filtrate.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="core\assets\icons\lente_ingrandimento.ico" />
-    <Resource Include="core\assets\icons\radar.ico" />
-    <Resource Include="core\assets\icons\windmill.ico" />
+    <Resource Include="core\assets\application_icons\lente_ingrandimento.ico" />
+    <Resource Include="core\assets\application_icons\radar.ico" />
+    <Resource Include="core\assets\application_icons\windmill.ico" />
+    <Resource Include="core\assets\socket_status_icons\aperte.png" />
+    <Resource Include="core\assets\socket_status_icons\chiuse.png" />
+    <Resource Include="core\assets\socket_status_icons\filtrate.png" />
   </ItemGroup>
 
   <ItemGroup>

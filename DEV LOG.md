@@ -403,6 +403,36 @@ TODOS.md:
 
 ---
 
+### [xx/04/2026]
+**Attività svolte**
+- Aggiornamenti UI
+- Aggiornamenti backend
+- Aggiornamenti classe Base_Socket
+- Creata classe InformationWindow
+- Modifiche struttura del progetto
+
+UI:
+- Cambiate le icone per la visualizzazione dello stato di una porta.
+- Aggiunta opzione per visualizzare le statistiche complete di una scansione all'interno del menù "*Visualizza > Informazioni*".
+
+Backend:
+- Aggiunta logica per rilevare le statistiche di una scansione.
+- Aggiunte le shortcut per la finestra "*Statistiche Scansione*".
+- Aggiunta ed aggiornata della documentazione.
+
+Base_Socket:
+- Creato nuovo overload per il metodo "*CheckValidPort()*" per accettare un intero.
+- Aggiornata della documentazione.
+
+InformationWindow:
+- Creata classe "*InformationWindow*" per la creazione di una finestra contenente le statistiche dell'applicazione e della scansione effettuata.
+
+Struttura del progetto:
+- Aggiunta nuova directory "*socket_status_icons*".
+- Aggiunta nuova classe "*InformationWindow*" in *core/models*.
+
+---
+
 <p><a href="#log">Premi qui</a> per tornare all'inizio del log di sviluppo.</p>
 
 ---
