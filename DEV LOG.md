@@ -403,7 +403,7 @@ TODOS.md:
 
 ---
 
-### [xx/04/2026]
+### [18/04/2026]
 **Attività svolte**
 - Aggiornamenti UI
 - Aggiornamenti backend
