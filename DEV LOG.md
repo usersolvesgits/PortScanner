@@ -448,6 +448,7 @@ UI:
 
 Backend:
 - Creata nuova variabile per tenere traccia del numero di scansioni effettuate.
+- Aggiunta la logica per l'aggiornamento della visualizzazione del progresso della scansione nella taskbar.
 
 Base_Socket:
 - Aggiunta la documentazione ai metodi *Connect()* e rimossa a gli override dei metodi delle classi *TCP_Socket* e *UDP_Socket*. 

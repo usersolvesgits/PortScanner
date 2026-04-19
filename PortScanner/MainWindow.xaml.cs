@@ -1,17 +1,21 @@
 ﻿using Microsoft.Win32;
+using PortScanner.core.models;
+using PortScanner.core.models.sockets;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Shell;
 using AddressFamily = System.Net.Sockets.AddressFamily;
 using SelectionChangedEventArgs = System.Windows.Controls.SelectionChangedEventArgs;
-using PortScanner.core.models;
-using PortScanner.core.models.sockets;
-using System.Windows.Media;
 
 namespace PortScanner;
 
@@ -70,6 +74,7 @@ public partial class MainWindow : Window {
         dtgScansioni.ItemsSource = socketVisualizzate;
         txtIPAddress.Focus();
         txtIPAddress.CaretIndex = txtIPAddress.Text.Length;
+        tskbrInfoScansione.ProgressState = TaskbarItemProgressState.Normal;
         Title = $"PortScanner - {VERSIONE_APPLICAZIONE}";
     }
 
@@ -272,12 +277,14 @@ public partial class MainWindow : Window {
         Stopwatch durataScansione = new();
         durataScansione.Start();
         tempoScansione = DateTime.Now;
-        double progressoScansione = 0;
+        double progressoScansione = 0,
+               progressoScansioneTaskbar = 0;
         Dispatcher.Invoke(() => {
             cmbTipoScansione.IsEnabled = false;
             cmbFiltri.SelectedIndex = 0;
             cmbOrdina.SelectedIndex = 0;
             prbProgressoScan.Value = progressoScansione;
+            tskbrInfoScansione.ProgressValue = progressoScansioneTaskbar;
         });
 
         for (int currentPortNum = rangePortMin; currentPortNum <= rangePortMax; currentPortNum++) {
@@ -301,10 +308,11 @@ public partial class MainWindow : Window {
 
                 porteScansionate++;
                 progressoScansione = (double)porteScansionate / porteTotali * 100;
+                progressoScansioneTaskbar = (double)porteScansionate / porteTotali;
                 if (porteScansionate % INTERVALLO_AGGIORNAMENTO_PROGRESSBAR == 0 ||
                     porteScansionate == porteTotali) {
                     if (progressoScansione <= 25) {
-                        Dispatcher.Invoke(() => {
+                        Dispatcher.BeginInvoke(() => {
                             prbProgressoScan.Foreground = Brushes.Red;
                         });
                     } else if (progressoScansione <= 75) {
@@ -312,18 +320,21 @@ public partial class MainWindow : Window {
                             prbProgressoScan.Foreground = Brushes.Orange;
                         });
                     } else if (progressoScansione <= 99) {
-                        Dispatcher.Invoke(() => {
+                        Dispatcher.BeginInvoke(() => {
                             prbProgressoScan.Foreground = Brushes.Green;
                         });
                     } else {
-                        Dispatcher.Invoke(() => {
+                        Dispatcher.BeginInvoke(() => {
                             prbProgressoScan.Foreground = Brushes.Blue;
                         });
                     }
-                    Dispatcher.Invoke(() => {
+                    Dispatcher.BeginInvoke(() => {
                         prbProgressoScan.Value = progressoScansione;
                     });
                 }
+                Dispatcher.BeginInvoke(() => {
+                    tskbrInfoScansione.ProgressValue = progressoScansioneTaskbar;
+                });
             } catch (NotImplementedException e) {
                 Debug.WriteLine(e.Message);
                 Debug.WriteLine(e);
@@ -336,6 +347,7 @@ public partial class MainWindow : Window {
                     txtDurata.Text = txtDurata.Text.Replace("0", durataScansione_l.ToString());
                     txtPorteAperte.Text = txtPorteAperte.Text.Replace("0", porteAperte.ToString());
                     txtPorteScansionate.Text = txtPorteScansionate.Text.Replace("0", porteScansionate.ToString());
+                    tskbrInfoScansione.ProgressValue = 0;
                 });
                 MessageBox.Show("Attenzione: Scansione UDP non ancora implementata, cambiare modalità di scansione!",
                                 "Warning",
@@ -354,6 +366,7 @@ public partial class MainWindow : Window {
                     txtDurata.Text = txtDurata.Text.Replace("0", durataScansione_l.ToString());
                     txtPorteAperte.Text = txtPorteAperte.Text.Replace("0", porteAperte.ToString());
                     txtPorteScansionate.Text = txtPorteScansionate.Text.Replace("0", porteScansionate.ToString());
+                    tskbrInfoScansione.ProgressValue = 0;
                 });
                 MessageBox.Show("ERRORE: Errore rilevato durante l'esecuzione della scansione!",
                                 "Errore",
@@ -375,6 +388,7 @@ public partial class MainWindow : Window {
                     txtDurata.Text = txtDurata.Text.Replace("0", durataScansione_l.ToString());
                     txtPorteAperte.Text = txtPorteAperte.Text.Replace("0", porteAperte.ToString());
                     txtPorteScansionate.Text = txtPorteScansionate.Text.Replace("0", porteScansionate.ToString());
+                    tskbrInfoScansione.ProgressValue = 0;
                 });
                 return;
             }
@@ -387,6 +401,7 @@ public partial class MainWindow : Window {
             txtDurata.Text = txtDurata.Text.Replace("0", durataScansione_l.ToString());
             txtPorteAperte.Text = txtPorteAperte.Text.Replace("0", porteAperte.ToString());
             txtPorteScansionate.Text = txtPorteScansionate.Text.Replace("0", porteScansionate.ToString());
+            tskbrInfoScansione.ProgressValue = 0;
         });
         scansioneAttiva = false;
     }
