@@ -19,6 +19,8 @@ public class InformationWindow : Window {
 
     private long DurataScansione { get; set; }
 
+    private int NumeroScansioni { get; set; }
+
     private string Stato { get; set; }
 
     public InformationWindow(string versione, string stato,
@@ -26,6 +28,7 @@ public class InformationWindow : Window {
                              long durata,
                              IPAddress target,
                              int porteTOT, int porteOpen, int porteClosed, int porteFiltered,
+                             int numeroScansioni,
                              Window owner) {
         VersioneApplicazione = versione;
         Stato = stato;
@@ -37,6 +40,8 @@ public class InformationWindow : Window {
         PorteOpen = porteOpen;
         PorteClosed = porteClosed;
         PorteFiltered = porteFiltered;
+
+        NumeroScansioni = numeroScansioni;
 
         DurataScansione = durata;
 
@@ -94,8 +99,9 @@ public class InformationWindow : Window {
         TextBlock generalInfoScansione = new() {
             Text = $"Scansione avviata: {TempoScansione:dd/MM/yyyy HH:mm:ss}\n" + 
                    $"Durata scansione (ms): {DurataScansione}\n" +
-                   $"Target: {TargetScansione}\n",
-            Margin = new Thickness(0, 0, 0, 5)
+                   $"Target: {TargetScansione}\n" + 
+                   $"Numero di scansioni effettuate: {NumeroScansioni}",
+            Margin = new Thickness(0, 0, 0, 10)
         };
 
         TextBlock porte = new() {

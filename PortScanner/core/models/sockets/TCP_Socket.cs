@@ -41,9 +41,6 @@ public class TCP_Socket : Base_Socket {
     }
 
 
-    /// <summary>
-    /// Metodo usato per controllare lo stato delle porte.
-    /// </summary>
     public override void Connect() {
         using TcpClient TcpC = new();
         try {
@@ -67,12 +64,6 @@ public class TCP_Socket : Base_Socket {
         }
     }
 
-    /// <summary>
-    /// Metodo usato per controllare lo stato delle porte.
-    /// </summary>
-    /// <param name="timeout">
-    /// Numero di millisecondi per decretare se una porta è aperta o meno.
-    /// </param>
     public override void Connect(int timeout) {
         using TcpClient TcpC = new();
         try {

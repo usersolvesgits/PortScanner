@@ -16,7 +16,7 @@ using System.Windows.Media;
 namespace PortScanner;
 
 public partial class MainWindow : Window {
-    const string VERSIONE_APPLICAZIONE = "1.1.0";
+    const string VERSIONE_APPLICAZIONE = "1.1.1";
     const string STATO_APPLICAZIONE = "Ongoing";
     const string URL_SVILUPPATORE = "https://github.com/usersolvesgits";
     const string URL_AZIENDA = "https://www.sirius.to.it/";
@@ -59,6 +59,7 @@ public partial class MainWindow : Window {
     int porteTotali = 0,
         porteAperte = 0,
         porteScansionate = 0;
+    int numeroScansione = 0;
     long durataScansione_l = 0;
     bool scansioneAttiva = false,
          richiestaFermataScansione = false;
@@ -190,6 +191,8 @@ public partial class MainWindow : Window {
         porteTOT = socketsScansionate.Count;
         durata = durataScansione_l;
 
+        porteOpen = porteClosed = porteFiltered = 0;
+
         foreach (Base_Socket socket in socketsScansionate) {
             switch (socket.Stato) {
                 case Base_Socket.StatoPorta.Aperta:
@@ -220,6 +223,7 @@ public partial class MainWindow : Window {
         InformationWindow finestraInfo = new(VERSIONE_APPLICAZIONE, STATO_APPLICAZIONE,
                                              tempo, durata, indirizzoTarget,
                                              porteTOT, porteOpen, porteClosed, porteFiltered,
+                                             numeroScansione,
                                              mainWindow);
         finestraInfo.CreaFinestra();
         finestraInfo.Show();
@@ -375,6 +379,7 @@ public partial class MainWindow : Window {
                 return;
             }
         }
+        numeroScansione++;
         durataScansione.Stop();
         durataScansione_l = durataScansione.ElapsedMilliseconds;
         Dispatcher.Invoke(() => {

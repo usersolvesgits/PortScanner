@@ -366,6 +366,15 @@ public abstract class Base_Socket {
         }
     }
 
+    /// <summary>
+    /// Metodo usato per controllare lo stato delle porte.
+    /// </summary>
     public abstract void Connect();
+    /// <summary>
+    /// Metodo usato per controllare lo stato delle porte.
+    /// </summary>
+    /// <param name="timeout">
+    /// Numero di millisecondi per decretare se una porta è aperta o meno.
+    /// </param>
     public abstract void Connect(int timeout);
 }

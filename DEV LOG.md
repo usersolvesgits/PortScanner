@@ -395,11 +395,13 @@ UI:
 
 Backend:
 - Creata una stringa costante *VERSIONE_APPLICAZIONE* per tenere conto della versione del progetto, da modificare manualmente ogni volta che si cambia qualcosa.
-- Aggiornata la logica di ordinamento e filtraggio di porte per lavorare in contemporanea.
 - Aggiunta nuova opzione di ordinamento *PorteDecrescente* nell'enum *OpzioniOrdinamenti*.
 
 TODOS.md:
 - Creato il file *TODOS.md* per tenere traccia delle funzionalità da implementare nel progetto.
+
+**Bug Fix**
+- Risolto bug n°1 del giorno *03/04/2026*.
 
 ---
 
@@ -430,6 +432,31 @@ InformationWindow:
 Struttura del progetto:
 - Aggiunta nuova directory "*socket_status_icons*".
 - Aggiunta nuova classe "*InformationWindow*" in *core/models*.
+
+---
+
+### [19/04/2026]
+**Attività svolte**
+- Aggiornamenti UI
+- Aggiornamenti backend
+- Aggiornamenti Base_Socket
+- Aggiornamenti InformationWindow
+- Bug fixing
+
+UI:
+- Spostato il pulsante per visualizzare la finestra di informazioni dalla sezione "*Visualizza*" al menù stesso.
+
+Backend:
+- Creata nuova variabile per tenere traccia del numero di scansioni effettuate.
+
+Base_Socket:
+- Aggiunta la documentazione ai metodi *Connect()* e rimossa a gli override dei metodi delle classi *TCP_Socket* e *UDP_Socket*. 
+
+InformationWindow:
+- Creata nuova sezione per mostrare il numero di scansioni.
+
+**Bug Fix**
+- Risolto bug dove la finestra delle informazioni continuava a mostrare "*-1*" come risultato della scansione, al posto dei veri risultati.
 
 ---
 

@@ -11,7 +11,7 @@ Le sezioni segnate dal segno "*[?]*" sono delle funzionalità di cui non si sa se
 ---
 
 ## UI
-1. [?] Aggiornamento in tempo reale di alcune statistiche di scansione
+1. [?] Aggiornamento in tempo reale di alcune statistiche di scansione.
 
 ---
 

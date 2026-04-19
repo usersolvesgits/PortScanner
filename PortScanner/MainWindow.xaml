@@ -28,8 +28,8 @@
                 </MenuItem>
                 <MenuItem Header="Esci" Click="Esci" InputGestureText="Ctrl + Q"/>
             </MenuItem>
+            <MenuItem Header="Informazioni (Ctrl + I)" Click="PortScanner_Informazioni" InputGestureText="Ctrl + I"/>
             <MenuItem Header="Visualizza">
-                <MenuItem Header="Informazioni" Click="PortScanner_Informazioni" InputGestureText="Ctrl + I"/>
                 <MenuItem Header="Temi">
                     <MenuItem Header="Tema Chiaro" Click="Tema_Chiaro" InputGestureText="Ctrl + Alt + L"/>
                     <MenuItem Header="Tema Scuro" Click="Tema_Scuro" InputGestureText="Ctrl + Alt + D"/>
