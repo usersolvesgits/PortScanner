@@ -246,20 +246,6 @@ public abstract class Base_Socket {
     /// Restituisce la rappresentazione della porta in formato CSV.
     /// </summary>
     /// <param name="separatore">
-    /// Carattere utilizzato come separatore tra i campi del file.
-    /// </param>
-    /// <returns>
-    /// Una stringa che rappresenta lo stato della porta nel formato:
-    /// <c><see cref="Stato"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>.
-    /// </returns>
-    public static string ToCSV(Base_Socket socket, char separatore) {
-        return $"{socket.Stato}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
-    }
-
-    /// <summary>
-    /// Restituisce la rappresentazione della porta in formato CSV.
-    /// </summary>
-    /// <param name="separatore">
     /// Stringa utilizzata come separatore tra i campi del file.
     /// </param>
     /// <returns>
@@ -267,31 +253,6 @@ public abstract class Base_Socket {
     /// <c><see cref="Stato"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>.
     /// </returns>
     public static string ToCSV(Base_Socket socket, string separatore) {
-        return $"{socket.Stato}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
-    }
-
-    /// <summary>
-    /// Restituisce la rappresentazione della porta in formato CSV 
-    /// con la possibilità di includere anche l'indirizzo IP.
-    /// </summary>
-    /// <param name="ShowIPAddress">
-    /// Se <see langword="true"/>, la stringa risultante includerà anche 
-    /// l'indirizzo IP del destinatario come primo campo.
-    /// </param>
-    /// <param name="separatore">
-    /// Carattere utilizzato come separatore tra i campi del file.
-    /// </param>
-    /// <returns>
-    /// Una stringa che rappresenta lo stato della porta nel formato:
-    /// <c><see cref="Stato"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>
-    /// oppure
-    /// <c><see cref="IPAddress">,<see cref="Stato"/>,<see cref="NumeroPorta"/>,<see cref="Servizio"/></c>
-    /// se <paramref name="ShowIPAddress"/> è <see langword="true"/>.
-    /// </returns>
-    public static string ToCSV(Base_Socket socket, char separatore, bool ShowIPAddress) {
-        if (ShowIPAddress) {
-            return $"{socket.IPAddress?.ToString()}{separatore}{socket.Stato}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
-        }
         return $"{socket.Stato}{separatore}{socket.NumeroPorta}{separatore}{socket.Servizio}";
     }
 
@@ -339,6 +300,15 @@ public abstract class Base_Socket {
         });
     }
 
+    /// <summary>
+    /// Formatta le informazioni di un oggetto <see cref="Base_Socket"/> in una stringa JSON.
+    /// </summary>
+    /// <param name="socket">Un oggetto <see cref="Base_Socket"/> da convertire in formato JSON.</param>
+    /// <param name="showIPAddress">
+    /// Se <see langword="true"/>, la stringa risultante includerà anche 
+    /// l'indirizzo IP del destinatario come primo campo.
+    /// </param>
+    /// <returns>Una stringa contenente la rappresentazione JSON del <see cref="Base_Socket"/> specificato.</returns>
     public static string ToJSON(Base_Socket socket, bool showIPAddress) {
         JsonSerializerOptions JSONOption = new() {
             WriteIndented = true

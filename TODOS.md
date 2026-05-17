@@ -18,6 +18,7 @@ Le sezioni segnate dal segno "*[?]*" sono delle funzionalità di cui non si sa se
 ## Logica principale
 1. Permettere scansioni UDP.
 2. Migliorare il metodo di fermata della scansione.
+3. Aggiungere la logica di importazione da formati CSV e JSON.
 
 ---
 

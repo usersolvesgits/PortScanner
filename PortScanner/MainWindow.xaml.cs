@@ -1,17 +1,15 @@
 ﻿using Microsoft.Win32;
 using PortScanner.core.models;
 using PortScanner.core.models.sockets;
-using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Shell;
 using AddressFamily = System.Net.Sockets.AddressFamily;
@@ -20,7 +18,7 @@ using SelectionChangedEventArgs = System.Windows.Controls.SelectionChangedEventA
 namespace PortScanner;
 
 public partial class MainWindow : Window {
-    const string VERSIONE_APPLICAZIONE = "1.1.1";
+    const string VERSIONE_APPLICAZIONE = "1.1.2";
     const string STATO_APPLICAZIONE = "Ongoing";
     const string URL_SVILUPPATORE = "https://github.com/usersolvesgits";
     const string URL_AZIENDA = "https://www.sirius.to.it/";
@@ -280,11 +278,7 @@ public partial class MainWindow : Window {
         double progressoScansione = 0,
                progressoScansioneTaskbar = 0;
         Dispatcher.Invoke(() => {
-            cmbTipoScansione.IsEnabled = false;
-            cmbFiltri.SelectedIndex = 0;
-            cmbOrdina.SelectedIndex = 0;
-            prbProgressoScan.Value = progressoScansione;
-            tskbrInfoScansione.ProgressValue = progressoScansioneTaskbar;
+            Scan_ResetUI();
         });
 
         for (int currentPortNum = rangePortMin; currentPortNum <= rangePortMax; currentPortNum++) {
@@ -309,32 +303,7 @@ public partial class MainWindow : Window {
                 porteScansionate++;
                 progressoScansione = (double)porteScansionate / porteTotali * 100;
                 progressoScansioneTaskbar = (double)porteScansionate / porteTotali;
-                if (porteScansionate % INTERVALLO_AGGIORNAMENTO_PROGRESSBAR == 0 ||
-                    porteScansionate == porteTotali) {
-                    if (progressoScansione <= 25) {
-                        Dispatcher.BeginInvoke(() => {
-                            prbProgressoScan.Foreground = Brushes.Red;
-                        });
-                    } else if (progressoScansione <= 75) {
-                        Dispatcher.Invoke(() => {
-                            prbProgressoScan.Foreground = Brushes.Orange;
-                        });
-                    } else if (progressoScansione <= 99) {
-                        Dispatcher.BeginInvoke(() => {
-                            prbProgressoScan.Foreground = Brushes.Green;
-                        });
-                    } else {
-                        Dispatcher.BeginInvoke(() => {
-                            prbProgressoScan.Foreground = Brushes.Blue;
-                        });
-                    }
-                    Dispatcher.BeginInvoke(() => {
-                        prbProgressoScan.Value = progressoScansione;
-                    });
-                }
-                Dispatcher.BeginInvoke(() => {
-                    tskbrInfoScansione.ProgressValue = progressoScansioneTaskbar;
-                });
+                Scan_UpdateProgressBars(progressoScansione, progressoScansioneTaskbar);
             } catch (NotImplementedException e) {
                 Debug.WriteLine(e.Message);
                 Debug.WriteLine(e);
@@ -342,12 +311,8 @@ public partial class MainWindow : Window {
                 durataScansione.Stop();
                 durataScansione_l = durataScansione.ElapsedMilliseconds;
                 Dispatcher.Invoke(() => {
-                    cmbTipoScansione.IsEnabled = true;
                     prbProgressoScan.Value = progressoScansione;
-                    txtDurata.Text = txtDurata.Text.Replace("0", durataScansione_l.ToString());
-                    txtPorteAperte.Text = txtPorteAperte.Text.Replace("0", porteAperte.ToString());
-                    txtPorteScansionate.Text = txtPorteScansionate.Text.Replace("0", porteScansionate.ToString());
-                    tskbrInfoScansione.ProgressValue = 0;
+                    Scan_ClearRisultati();
                 });
                 MessageBox.Show("Attenzione: Scansione UDP non ancora implementata, cambiare modalità di scansione!",
                                 "Warning",
@@ -361,12 +326,8 @@ public partial class MainWindow : Window {
                 durataScansione.Stop();
                 durataScansione_l = durataScansione.ElapsedMilliseconds;
                 Dispatcher.Invoke(() => {
-                    cmbTipoScansione.IsEnabled = true;
                     prbProgressoScan.Value = progressoScansione;
-                    txtDurata.Text = txtDurata.Text.Replace("0", durataScansione_l.ToString());
-                    txtPorteAperte.Text = txtPorteAperte.Text.Replace("0", porteAperte.ToString());
-                    txtPorteScansionate.Text = txtPorteScansionate.Text.Replace("0", porteScansionate.ToString());
-                    tskbrInfoScansione.ProgressValue = 0;
+                    Scan_ClearRisultati();
                 });
                 MessageBox.Show("ERRORE: Errore rilevato durante l'esecuzione della scansione!",
                                 "Errore",
@@ -383,12 +344,8 @@ public partial class MainWindow : Window {
                 durataScansione_l = durataScansione.ElapsedMilliseconds;
 
                 Dispatcher.Invoke(() => {
-                    cmbTipoScansione.IsEnabled = true;
                     prbProgressoScan.Value = progressoScansione;
-                    txtDurata.Text = txtDurata.Text.Replace("0", durataScansione_l.ToString());
-                    txtPorteAperte.Text = txtPorteAperte.Text.Replace("0", porteAperte.ToString());
-                    txtPorteScansionate.Text = txtPorteScansionate.Text.Replace("0", porteScansionate.ToString());
-                    tskbrInfoScansione.ProgressValue = 0;
+                    Scan_ClearRisultati();
                 });
                 return;
             }
@@ -397,11 +354,7 @@ public partial class MainWindow : Window {
         durataScansione.Stop();
         durataScansione_l = durataScansione.ElapsedMilliseconds;
         Dispatcher.Invoke(() => {
-            cmbTipoScansione.IsEnabled = true;
-            txtDurata.Text = txtDurata.Text.Replace("0", durataScansione_l.ToString());
-            txtPorteAperte.Text = txtPorteAperte.Text.Replace("0", porteAperte.ToString());
-            txtPorteScansionate.Text = txtPorteScansionate.Text.Replace("0", porteScansionate.ToString());
-            tskbrInfoScansione.ProgressValue = 0;
+            Scan_ClearRisultati();
         });
         scansioneAttiva = false;
     }
@@ -531,6 +484,63 @@ public partial class MainWindow : Window {
             richiestaFermataScansione = true;
         }
     }
+    /// <summary>
+    /// Metodo usato per aggiornare lo stato delle progressbar
+    /// </summary>
+    /// <param name="progressoScansione">
+    /// Variabile <see langword="double"/> che rispecchia il progresso della scansione. Usata nell' interfaccia grafica dell'applicazione.
+    /// </param>
+    /// <param name="progressoScansioneTaskbar">
+    /// Variabile <see langword="double"/> che rispecchia il progresso della scansione. Usata nella taskbar di windows.
+    /// </param>
+    private void Scan_UpdateProgressBars(double progressoScansione, double progressoScansioneTaskbar) {
+        if (porteScansionate % INTERVALLO_AGGIORNAMENTO_PROGRESSBAR == 0 ||
+            porteScansionate == porteTotali) {
+            if (progressoScansione <= 25) {
+                Dispatcher.BeginInvoke(() => {
+                    prbProgressoScan.Foreground = Brushes.Red;
+                });
+            } else if (progressoScansione <= 75) {
+                Dispatcher.Invoke(() => {
+                    prbProgressoScan.Foreground = Brushes.Orange;
+                });
+            } else if (progressoScansione <= 99) {
+                Dispatcher.BeginInvoke(() => {
+                    prbProgressoScan.Foreground = Brushes.Green;
+                });
+            } else {
+                Dispatcher.BeginInvoke(() => {
+                    prbProgressoScan.Foreground = Brushes.Blue;
+                });
+            }
+            Dispatcher.BeginInvoke(() => {
+                prbProgressoScan.Value = progressoScansione;
+            });
+        }
+        Dispatcher.BeginInvoke(() => {
+            tskbrInfoScansione.ProgressValue = progressoScansioneTaskbar;
+        });
+    }
+    /// <summary>
+    /// Metodo usato per ripristinare tutte le variabili o elementi grafici al loro stato di origine in caso di interruzione della scansione
+    /// </summary>
+    private void Scan_ClearRisultati() {
+        cmbTipoScansione.IsEnabled = true;
+        txtDurata.Text = txtDurata.Text.Replace("0", durataScansione_l.ToString());
+        txtPorteAperte.Text = txtPorteAperte.Text.Replace("0", porteAperte.ToString());
+        txtPorteScansionate.Text = txtPorteScansionate.Text.Replace("0", porteScansionate.ToString());
+        tskbrInfoScansione.ProgressValue = 0;
+    }
+    /// <summary>
+    /// Metodo usato per resettare tutti gli elementi grafici prima di eseguire una scansione
+    /// </summary>
+    private void Scan_ResetUI() {
+        cmbTipoScansione.IsEnabled = false;
+        cmbFiltri.SelectedIndex = 0;
+        cmbOrdina.SelectedIndex = 0;
+        prbProgressoScan.Value = 0;
+        tskbrInfoScansione.ProgressValue = 0;
+    }
 
     private void Esportazione_CSV(object sender, RoutedEventArgs e) {
         if (dtgScansioni.Items.Count == 0) {
@@ -578,17 +588,9 @@ public partial class MainWindow : Window {
         }
 
         try {
-            using StreamWriter writer = new(filePath);
-            for (int i = 0; i < dtgScansioni.Items.Count; i++) {
-                var socket = dtgScansioni.Items[i] as Base_Socket;
-                if (i == 0) {
-                    writer.WriteLine($"Scansione avviata: [{tempoScansione.ToString("dd/MM/yyyy HH:mm:ss")}]");
-                    writer.WriteLine($"Durata della scansione: [{durataScansione_l}]ms");
-                    writer.WriteLine($"Target: {socket.IPAddress?.ToString()}");
-                    writer.WriteLine($"Stato della porta{separatoreCSV}Numero della porta{separatoreCSV}Servizio rilevato");
-                }
-                writer.WriteLine(Base_Socket.ToCSV(socket, separatoreCSV));
-            }
+            Esportazioni.ToCSV(filePath, separatoreCSV, 
+                               tempoScansione, durataScansione_l, 
+                               socketVisualizzate.ToList());
         } catch (Exception ex) {
             Debug.WriteLine(ex);
             MessageBox.Show("Errore: Errore rilevato durante l'esportazione del file.",
@@ -655,6 +657,42 @@ public partial class MainWindow : Window {
                             "Errore",
                             MessageBoxButton.OK,
                             MessageBoxImage.Error);
+        }
+    }
+    private void Importazione_CSV(object sender, RoutedEventArgs e) {
+        OpenFileDialog dlg = new() { 
+            Filter = "File CSV (*.csv)|*.csv",
+            Title = "Importa file"
+        };
+
+        string path = string.Empty;
+        if (dlg.ShowDialog() == true) {
+            path = dlg.FileName;
+        }
+
+        if (string.IsNullOrWhiteSpace(path)) {
+            return;
+        }
+
+        char[] separatori = [
+            ',', ';', ':', '.', '?', '/', '\\'
+        ];
+        try {
+            Importazioni.ImportaCSV(path, separatori);
+        } catch (NotImplementedException ex) {
+            Debug.WriteLine(ex);
+            MessageBox.Show("ATTENZIONE: Funzione non ancora implementata!",
+                            "Attenzione",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning);
+            return;
+        } catch (Exception ex) {
+            Debug.WriteLine(ex);
+            MessageBox.Show("ERRORE: Errore durante l'importazione del file!",
+                            "Errore",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+            return;
         }
     }
 

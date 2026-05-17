@@ -461,6 +461,33 @@ InformationWindow:
 
 ---
 
+### [15/05/2026]
+**Attività svolte**
+- Aggiornamenti UI
+- Aggiornamenti backend
+- Creazione nuove classi
+- Bug Fix
+
+UI:
+- Aggiunta nuova sezione per l'importazione di risultati.
+
+Backend:
+- Riorganizzato l'ordine del codice nella sezione della scansione principale.
+- Modificata la logica per l'esportazione nei vari formati (adesso si basa sulla nuova classe creata "*Esportazioni*").
+- Aggiunta logica per l'importazione di file CSV (da completare).
+
+Esportazioni:
+- Creata classe statica dove è contenuta la logica per l'esportazione in vari formati.
+
+Importazioni:
+- Creata classe statica dove è contenuta la logica per l'importazione in vari formati.
+
+
+**Bug Fix**
+- Rimossi overload inutili dalla classe *Base_Socket*.
+
+---
+
 <p><a href="#log">Premi qui</a> per tornare all'inizio del log di sviluppo.</p>
 
 ---
